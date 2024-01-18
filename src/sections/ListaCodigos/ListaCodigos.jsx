@@ -1,20 +1,40 @@
 import React from 'react'
+import { Form } from 'react-bootstrap'
+import { useForm } from '../../hooks/useForm';
 
 export const ListaCodigos = () => {
+    const initialForm = {
+        searchText: "",
+    };
+    
+    const { formState, onInputChange, onResetForm } = useForm(initialForm);
+
     return (
         <>
             <h1>
                 Lista de Códigos y Productos
             </h1>
             <hr />
-            <button type="button my-2" class="btn btn-primary">
-            <i class="bi bi-plus-circle"></i> Agregar Producto
+            <button type="button my-2" className="btn btn-primary">
+                <i className="bi bi-plus-circle"></i> Agregar Producto
             </button>
-            <table class="table table-striped">
+            <Form className="mt-3">
+                <input
+                    type="text"
+                    placeholder="Busca una Ciudad"
+                    className="form-control"
+                    name="searchText"
+                    autoComplete="off"
+                    value={formState.searchText}
+                    onChange={onInputChange}
+                />
+            </Form>
+            <table className="table table-striped">
                 <thead>
                     <tr>
                         <th scope="col">#</th>
-                        <th scope="col">Código</th>
+                        <th scope="col">Código de Barras</th>
+                        <th scope="col">Código simple</th>
                         <th scope="col">Descripción</th>
                         <th scope="col">Acciones</th>
                     </tr>
@@ -23,28 +43,31 @@ export const ListaCodigos = () => {
                     <tr>
                         <th scope="row">1</th>
                         <td>7002384917</td>
+                        <td>-</td>
                         <td>Papas Fritas LAYS 500g.</td>
                         <td>
-                            <button type="button" class="btn btn-secondary me-2"><i class="bi bi-pencil"></i></button>
-                            <button type="button" class="btn btn-danger"><i class="bi bi-trash"></i></button>
+                            <button type="button" className="btn btn-secondary me-2"><i className="bi bi-pencil"></i></button>
+                            <button type="button" className="btn btn-danger"><i className="bi bi-trash"></i></button>
                         </td>
                     </tr>
                     <tr>
                         <th scope="row">2</th>
                         <td>7283944172</td>
+                        <td>-</td>
                         <td>COCA-COLA 3Lts</td>
                         <td>
-                            <button type="button" class="btn btn-secondary me-2"><i class="bi bi-pencil"></i></button>
-                            <button type="button" class="btn btn-danger"><i class="bi bi-trash"></i></button>
+                            <button type="button" className="btn btn-secondary me-2"><i className="bi bi-pencil"></i></button>
+                            <button type="button" className="btn btn-danger"><i className="bi bi-trash"></i></button>
                         </td>
                     </tr>
                     <tr>
                         <th scope="row">3</th>
                         <td>0020398299</td>
+                        <td>-</td>
                         <td>Chocolate BLOCK 600g.</td>
                         <td>
-                            <button type="button" class="btn btn-secondary me-2"><i class="bi bi-pencil"></i></button>
-                            <button type="button" class="btn btn-danger"><i class="bi bi-trash"></i></button>
+                            <button type="button" className="btn btn-secondary me-2"><i className="bi bi-pencil"></i></button>
+                            <button type="button" className="btn btn-danger"><i className="bi bi-trash"></i></button>
                         </td>
                     </tr>
                 </tbody>
