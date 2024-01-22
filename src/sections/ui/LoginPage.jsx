@@ -1,26 +1,61 @@
 import React, { useState } from "react";
 import { Alert, Button, Form } from "react-bootstrap";
 import { useForm } from "../../hooks/useForm";
+import { useNavigate } from "react-router-dom";
+
+/* Anexo LocalStorage: esto me permite controlar que siempre estén los 3 usuarios presentes */
+let usuario = JSON.parse(localStorage.getItem("usuario"));
+if (!usuario) {
+  let usuarios = [
+    { user: "gaston", password: "gaston" },
+    { user: "diurno", password: "diurno" },
+    { user: "nocturno", password: "nocturno" },
+  ];
+  localStorage.setItem("usuario", JSON.stringify(usuarios));
+}
+/* Fin anexo LocalStorage */
 
 export const LoginPage = () => {
   const [validated, setValidated] = useState(false);
 
+  const navigate = useNavigate();
+
   const initialForm = {
-    username: "",
+    user: "",
     password: "",
   };
 
   const { formState, onInputChange, onResetForm } = useForm(initialForm);
 
   const onLogin = () => {
-    console.log("onlogin funciona");
+    loguearse(formState);
   };
 
-  const enterPulsed = () => {
-    console.log("enterpulsed funciona");
+  const enterPulsed = (event) => {
+    if (event.key === "Enter") {
+      event.preventDefault();
+      loguearse(formState);
+    }
   };
 
-  const [showAlert, setShowAlert] = useState(true);
+  const loguearse = (datos) => {
+    /* Abajo iría la consulta al backend */
+    let logueo = usuario.find(
+      (p) => p.user == datos.user && p.password == datos.password
+    );
+    if (!logueo) {
+      setShowAlert(true);
+      console.log("error");
+    } else {
+      console.log("logueo");
+      navigate("/", {
+        replace: true,
+      });
+    }
+    /* Arriba iría la consulta al backend */
+  };
+
+  const [showAlert, setShowAlert] = useState(false);
 
   const [waitAxios, setWaitAxios] = useState(false);
 
@@ -33,9 +68,9 @@ export const LoginPage = () => {
             <Form.Group className="mb-3" controlId="formUser">
               <Form.Label>Usuario</Form.Label>
               <Form.Control
-                type="username"
-                value={formState.username}
-                name="username"
+                type="user"
+                value={formState.user}
+                name="user"
                 onChange={onInputChange}
                 required
               />
@@ -52,14 +87,22 @@ export const LoginPage = () => {
               />
             </Form.Group>
           </Form>
-          <Alert
-            variant="danger"
-            onClose={() => setShowAlert(false)}
-            dismissible
+          {showAlert && (
+            <>
+              <Alert
+                variant="danger"
+                onClose={() => setShowAlert(false)}
+                dismissible
+              >
+                <b>¡Usuario o Contraseña incorrectas!</b>
+              </Alert>
+            </>
+          )}
+          <Button
+            variant="outline-success "
+            onClick={onLogin}
+            disabled={waitAxios}
           >
-            <b>¡Usuario o Contraseña incorrectas!</b>
-          </Alert>
-          <Button variant="outline-success " onClick={onLogin} disabled={waitAxios}>
             Ingresar
           </Button>
         </div>

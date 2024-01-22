@@ -8,7 +8,6 @@ import { LoginPage } from "./sections/ui/LoginPage";
 export const App = () => {
   return (
     <>
-        <LoginPage />
       <div className="container-fluid px-5">
         <ListaStock />
         <ListaVentas />

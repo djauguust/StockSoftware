@@ -22,7 +22,7 @@ export const Navbar = () => {
                     
                     Gastón
                 </Link> */}
-                GASTÓN
+                Sistema de Stock
                 <div
                     className="collapse navbar-collapse"
                     id="navbarTogglerDemo01"
