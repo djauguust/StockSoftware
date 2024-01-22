@@ -12,7 +12,7 @@ export const ListaCodigos = () => {
     return (
         <>
             <h1>
-                Lista de Códigos y Productos
+                Lista de Códigos de productos
             </h1>
             <hr />
             <button type="button my-2" className="btn btn-primary">
