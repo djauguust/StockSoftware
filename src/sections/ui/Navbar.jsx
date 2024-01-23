@@ -1,35 +1,51 @@
-import React, { useState } from 'react'
-import { Button, Form, InputGroup } from 'react-bootstrap'
-import { Link, NavLink } from 'react-router-dom'
+import React, { useEffect, useState } from "react";
+import { Button, Form, InputGroup, NavDropdown } from "react-bootstrap";
+import { Link, NavLink, useNavigate } from "react-router-dom";
 
 export const Navbar = () => {
-    const [user, setuser] = useState(null)
-    return (<>
-        <nav className="navbar navbar-expand-lg navbar-light bg-light sticky-top">
-            <div className="container-fluid">
-                <button
-                    className="navbar-toggler"
-                    type="button"
-                    data-bs-toggle="collapse"
-                    data-bs-target="#navbarTogglerDemo01"
-                    aria-controls="navbarTogglerDemo01"
-                    aria-expanded="false"
-                    aria-label="Toggle navigation"
-                >
-                    <span className="navbar-toggler-icon"></span>
-                </button>
-                {/* <Link className="navbar-brand" to="/home">
+  let usuario = JSON.parse(localStorage.getItem("usuarioLogueado"));
+  const [user, setUser] = useState(null);
+  const navigate = useNavigate();
+
+  const onLogin = () => {
+    navigate("/login", {
+      replace: true,
+    });
+  };
+
+  const onLogout = () => {
+    localStorage.setItem("usuarioLogueado", null);
+    navigate("/login", {
+      replace: true,
+    });
+  };
+  return (
+    <>
+      <nav
+        className="navbar navbar-expand-lg bg-dark border-bottom border-body sticky-top text-white"
+        data-bs-theme="dark"
+      >
+        <div className="container-fluid">
+          <button
+            className="navbar-toggler"
+            type="button"
+            data-bs-toggle="collapse"
+            data-bs-target="#navbarTogglerDemo01"
+            aria-controls="navbarTogglerDemo01"
+            aria-expanded="false"
+            aria-label="Toggle navigation"
+          >
+            <span className="navbar-toggler-icon"></span>
+          </button>
+          {/* <Link className="navbar-brand" to="/home">
                     
                     Gastón
                 </Link> */}
-                Sistema de Stock
-                <div
-                    className="collapse navbar-collapse"
-                    id="navbarTogglerDemo01"
-                >
-                    <div className="navbar-collapse">
-                        <div className="navbar-nav">
-                            {/* <NavLink
+          Sistema de Stock
+          <div className="collapse navbar-collapse" id="navbarTogglerDemo01">
+            <div className="navbar-collapse">
+              <div className="navbar-nav">
+                {/* <NavLink
                                 className={({ isActive }) =>
                                     `nav-item nav-link ${isActive ? "active" : ""
                                     } `
@@ -48,50 +64,45 @@ export const Navbar = () => {
                             >
                                 Ingeniería en Computación
                             </NavLink> */}
+              </div>
+            </div>
 
-                            
-                        </div>
-                    </div>
-
-                    <div className="row">
-
-                        {/* Sin loguear */}
-                        <div className="col-lg-4 col-12">
-                            {!user ? (
-                                <Button variant="success" /* onClick={onLogin} */>
-                                    Ingresar
-                                </Button>
-                            ) : (
-                                <div className="navbar-nav">
-                                    <NavDropdown
-                                        title={`${user.nombres}`}
-                                        id="basic-nav-dropdown"
-                                    >
-                                        <NavDropdown.Item
-                                            onClick={toPerfil}
-                                        >
-                                            Perfil
-                                        </NavDropdown.Item>
-                                        <NavDropdown.Item
-                                            onClick={toConfiguracion}
-                                        >
-                                            Configuración
-                                        </NavDropdown.Item>
-                                        <NavDropdown.Divider />
-                                        <NavDropdown.Item href="">
-                                            <Button
-                                                variant="danger"
-                                                onClick={onLogout}
-                                            >
-                                                Cerrar Sesión
-                                            </Button>
-                                        </NavDropdown.Item>
-                                    </NavDropdown>
-                                </div>
-                            )}
-                        </div>
-                        <div className="ms-lg-1 my-lg-0 mt-2 mb-1 col-lg-6 col-12">
-                            {/* <Form>
+            <div className="row">
+              {/* Sin loguear */}
+              <div className="col-lg-4 col-12">
+                {!usuario ? (
+                  <Button variant="success" onClick={onLogin}>
+                    Ingresar
+                  </Button>
+                ) : (
+                  <div className="navbar-nav text-white">
+                    <NavDropdown
+                      title={`${usuario.nombre}`}
+                      id="basic-nav-dropdown"
+                      className="text-white"
+                    >
+                      {/* <NavDropdown.Item onClick={toPerfil}>
+                        Perfil
+                      </NavDropdown.Item>
+                      <NavDropdown.Item onClick={toConfiguracion}>
+                        Configuración
+                      </NavDropdown.Item>
+                      <NavDropdown.Divider />
+                      <NavDropdown.Item href="">
+                    </NavDropdown.Item> */}
+                      <Button
+                        variant="danger"
+                        onClick={onLogout}
+                        className="mx-3"
+                      >
+                        Cerrar Sesión
+                      </Button>
+                    </NavDropdown>
+                  </div>
+                )}
+              </div>
+              {/* <div className="ms-lg-1 my-lg-0 mt-2 mb-1 col-lg-6 col-12">
+                <Form>
                                 <InputGroup>
                                     <Form.Control
                                         type="text"
@@ -113,13 +124,12 @@ export const Navbar = () => {
                                         <i className="bi bi-search"></i>
                                     </Button>
                                 </InputGroup>
-                            </Form> */}
-                        </div>
-
-                    </div>
-                </div>
+                            </Form>
+              </div> */}
             </div>
-        </nav>
+          </div>
+        </div>
+      </nav>
     </>
-    )
-}
+  );
+};

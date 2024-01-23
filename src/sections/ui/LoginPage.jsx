@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Alert, Button, Form } from "react-bootstrap";
 import { useForm } from "../../hooks/useForm";
 import { useNavigate } from "react-router-dom";
@@ -7,9 +7,9 @@ import { useNavigate } from "react-router-dom";
 let usuario = JSON.parse(localStorage.getItem("usuario"));
 if (!usuario) {
   let usuarios = [
-    { user: "gaston", password: "gaston" },
-    { user: "diurno", password: "diurno" },
-    { user: "nocturno", password: "nocturno" },
+    { user: "gaston", password: "gaston", admin: true, nombre: "Gastón" },
+    { user: "diurno", password: "diurno", admin: false, nombre: "Turno Mañana" },
+    { user: "nocturno", password: "nocturno", admin: false, nombre: "Turno Tarde" },
   ];
   localStorage.setItem("usuario", JSON.stringify(usuarios));
 }
@@ -48,12 +48,22 @@ export const LoginPage = () => {
       console.log("error");
     } else {
       console.log("logueo");
+      localStorage.setItem("usuarioLogueado", JSON.stringify(logueo));
       navigate("/", {
         replace: true,
       });
     }
     /* Arriba iría la consulta al backend */
   };
+
+  useEffect(() => {
+    let usuarioLogueado = JSON.parse(localStorage.getItem("usuarioLogueado"));
+    if (usuarioLogueado) {
+      navigate("/", {
+        replace: true,
+      });
+    }
+  }, []);
 
   const [showAlert, setShowAlert] = useState(false);
 
