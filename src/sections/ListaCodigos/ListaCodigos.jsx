@@ -39,7 +39,7 @@ export const ListaCodigos = () => {
         description: "",
     };
 
-    const { formState, onInputChange, onResetForm } = useForm(initialForm);
+    const { formState, onInputChange, onResetForm, setFormState } = useForm(initialForm);
     const [showModal, setShowModal] = useState(false);
     const [listado, setListado] = useState();
     const [actualizar, setActualizar] = useState(false);
@@ -69,12 +69,17 @@ export const ListaCodigos = () => {
         ) {
             setShowAlert(true);
         }
-        let nuevoCP = {
-            largeCode: formState.largeCode || "-",
-            shortCode: formState.shortCode || "-",
-            description: formState.description,
-        };
-        agregarProducto(nuevoCP);
+        /* TO DO CONTROLAR QUE NO SE REPITA EL PRODUCTO O CÓDIGO */
+        if (addMode) {
+            let nuevoCP = {
+                largeCode: formState.largeCode || "-",
+                shortCode: formState.shortCode || "-",
+                description: formState.description,
+            };
+            agregarProducto(nuevoCP);
+        }else{
+            /* TO DO quede aquí */
+        }
         setShowModal(false);
         onResetForm();
         actualizador();
@@ -108,7 +113,24 @@ export const ListaCodigos = () => {
         /* /Lo hago con LocalStorage */
     }
 
-    const [toModify, setToModify] = useState(null)/* TO DO */
+    const handleSubmitEdit = (e) => {
+        console.log(e)
+        let sAux = e.shortCode, lAux = e.largeCode
+        if (e.shortCode == "-") {
+            sAux = ""
+        }
+        if (e.largeCode == "-") {
+            lAux = ""
+        }
+        let editProduct = {
+            shortCode: sAux,
+            largeCode: lAux,
+            description: e.description
+        }
+        setFormState(editProduct)
+        setAddMode(false)
+        setShowModal(true)
+    }
 
     return (
         <>
@@ -153,10 +175,8 @@ export const ListaCodigos = () => {
                             <td>{e.shortCode}</td>
                             <td>{e.description} </td>
                             <td>
-                                <button type="button" className="btn btn-secondary me-2" onClick={() => {
-                                    setShowModal(true)
-                                    setAddMode(false)
-                                }}>
+                                <button type="button" className="btn btn-secondary me-2" onClick={() => handleSubmitEdit(e)
+                                }>
                                     <i className="bi bi-pencil"></i>
                                 </button>
                                 <button type="button" className="btn btn-danger" onClick={() => handleDelete(e)}>
@@ -189,7 +209,7 @@ export const ListaCodigos = () => {
                                 </Form.Group>
                             </div>
                             <div className="col-6">
-                                <Form.Group className="mb-3" controlId="formCodBarra">
+                                <Form.Group className="mb-3" controlId="formCodBarraShort">
                                     <Form.Label>Código Simple</Form.Label>
                                     <Form.Control
                                         type="number"
@@ -200,7 +220,7 @@ export const ListaCodigos = () => {
                                 </Form.Group>
                             </div>
                             <div className="col-12">
-                                <Form.Group className="mb-3" controlId="formCodBarra">
+                                <Form.Group className="mb-3" controlId="formDescription">
                                     <Form.Label>Descripción</Form.Label>
                                     <Form.Control
                                         as="textarea"
@@ -243,7 +263,7 @@ export const ListaCodigos = () => {
                         }}
                     /* disabled={waitAxios} */
                     >
-                        Guardar Cambios
+                        {addMode ? "Agregar" : "Guardar Cambios"}
                     </Button>
                 </Modal.Footer>
             </Modal>
