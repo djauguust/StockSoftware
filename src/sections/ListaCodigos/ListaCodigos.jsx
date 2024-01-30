@@ -70,15 +70,28 @@ export const ListaCodigos = () => {
             setShowAlert(true);
         }
         /* TO DO CONTROLAR QUE NO SE REPITA EL PRODUCTO O CÓDIGO */
+        let nuevoCP = {
+            largeCode: formState.largeCode || "-",
+            shortCode: formState.shortCode || "-",
+            description: formState.description,
+        };
         if (addMode) {
-            let nuevoCP = {
-                largeCode: formState.largeCode || "-",
-                shortCode: formState.shortCode || "-",
-                description: formState.description,
-            };
             agregarProducto(nuevoCP);
-        }else{
-            /* TO DO quede aquí */
+        } else {
+            const index = parseInt(
+                listado.findIndex((p) => p.largeCode == oldProduct.largeCode &&
+                    p.shortCode == oldProduct.shortCode &&
+                    p.description == oldProduct.description)
+            );
+            if (index !== -1) {
+                let product = listado[index]
+                product.largeCode = nuevoCP.largeCode
+                product.shortCode = nuevoCP.shortCode
+                product.description = nuevoCP.description
+                localStorage.setItem("producto", JSON.stringify(listado));
+                setOldProduct(null)
+            }
+
         }
         setShowModal(false);
         onResetForm();
@@ -113,6 +126,7 @@ export const ListaCodigos = () => {
         /* /Lo hago con LocalStorage */
     }
 
+    const [oldProduct, setOldProduct] = useState(null)
     const handleSubmitEdit = (e) => {
         console.log(e)
         let sAux = e.shortCode, lAux = e.largeCode
@@ -123,10 +137,11 @@ export const ListaCodigos = () => {
             lAux = ""
         }
         let editProduct = {
-            shortCode: sAux,
             largeCode: lAux,
+            shortCode: sAux,
             description: e.description
         }
+        setOldProduct(e)
         setFormState(editProduct)
         setAddMode(false)
         setShowModal(true)
