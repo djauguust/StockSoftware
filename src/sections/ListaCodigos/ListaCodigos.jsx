@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Alert, Button, Form, Modal } from "react-bootstrap";
 import { useForm } from "../../hooks/useForm";
 
@@ -158,7 +158,7 @@ export const ListaCodigos = () => {
     let updatedData = [];
     let aux = [];
 
-    if (value.length) {
+    if (value?.length) {
       const filterFirstName =
         listado &&
         listado.filter((item) => {
@@ -201,6 +201,14 @@ export const ListaCodigos = () => {
       setBandera(1);
     }
   }, [listado]);
+
+  const campoDeEntradaRef = useRef(null);
+
+  useEffect(() => {
+    if (showModal && addMode) {
+      campoDeEntradaRef.current.focus();
+    }
+  }, [showModal]);
 
   return (
     <>
@@ -276,17 +284,6 @@ export const ListaCodigos = () => {
           <Form>
             <div className="row mx-0">
               <div className="col-6">
-                <Form.Group className="mb-3" controlId="formCodBarra">
-                  <Form.Label>Código de Barras</Form.Label>
-                  <Form.Control
-                    type="number"
-                    name="largeCode"
-                    value={formState.largeCode}
-                    onChange={onInputChange}
-                  />
-                </Form.Group>
-              </div>
-              <div className="col-6">
                 <Form.Group className="mb-3" controlId="formCodBarraShort">
                   <Form.Label>Código Simple</Form.Label>
                   <Form.Control
@@ -294,6 +291,18 @@ export const ListaCodigos = () => {
                     name="shortCode"
                     value={formState.shortCode}
                     onChange={onInputChange}
+                  />
+                </Form.Group>
+              </div>
+              <div className="col-6">
+                <Form.Group className="mb-3" controlId="formCodBarra">
+                  <Form.Label>Código de Barras</Form.Label>
+                  <Form.Control
+                    type="number"
+                    name="largeCode"
+                    value={formState.largeCode}
+                    onChange={onInputChange}
+                    ref={campoDeEntradaRef}
                   />
                 </Form.Group>
               </div>
