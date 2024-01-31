@@ -50,6 +50,7 @@ export const ListaCodigos = () => {
 
   useEffect(() => {
     setListado(JSON.parse(localStorage.getItem("producto")));
+    setListaFiltrada(JSON.parse(localStorage.getItem("producto")));
   }, [actualizar]);
 
   const handleClose = () => {
@@ -57,18 +58,37 @@ export const ListaCodigos = () => {
     setShowDeleteModal(false);
     setToDelete(null);
     setShowAlert(false);
+    setShowAlertRepeat(false);
     onResetForm();
+    actualizador();
   };
   const [addMode, setAddMode] = useState(true);
+  const [showAlertRepeat, setShowAlertRepeat] = useState(false);
 
   const handleSubmit = (objeto) => {
+    setShowAlert(false);
+    setShowAlertRepeat(false);
     if (
       objeto.description == "" ||
       (objeto.shortCode == "" && objeto.largeCode == "")
     ) {
       setShowAlert(true);
+      return;
     }
-    /* TO DO CONTROLAR QUE NO SE REPITA EL PRODUCTO O CÓDIGO */
+    let repeat = listado.findIndex(
+      (l) =>
+        l.largeCode == objeto.largeCode ||
+        l.shortCode == objeto.shortCode ||
+        l.description == objeto.description
+    );
+    
+    if (repeat !== -1) {
+      setShowAlertRepeat(true);
+      return;
+    } else {
+      setShowAlertRepeat(false);
+    }
+
     let nuevoCP = {
       largeCode: formState.largeCode || "-",
       shortCode: formState.shortCode || "-",
@@ -210,6 +230,13 @@ export const ListaCodigos = () => {
     }
   }, [showModal]);
 
+  const keyDown = (event) => {
+    if (event.key === "Enter") {
+      event.preventDefault();
+      handleSubmit(formState);
+    }
+  };
+
   return (
     <>
       <div className="mt-4"></div>
@@ -281,7 +308,11 @@ export const ListaCodigos = () => {
           </Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <Form>
+          <Form
+            onSubmit={() => {
+              handleSubmit(formState);
+            }}
+          >
             <div className="row mx-0">
               <div className="col-6">
                 <Form.Group className="mb-3" controlId="formCodBarraShort">
@@ -310,12 +341,12 @@ export const ListaCodigos = () => {
                 <Form.Group className="mb-3" controlId="formDescription">
                   <Form.Label>Descripción</Form.Label>
                   <Form.Control
-                    as="textarea"
                     rows={3}
                     type="text"
                     name="description"
                     value={formState.description}
                     onChange={onInputChange}
+                    onKeyDown={keyDown}
                   />
                 </Form.Group>
               </div>
@@ -331,6 +362,21 @@ export const ListaCodigos = () => {
                 <b>Formulario incompleto:</b>
                 <p>- El campo descripción debe ser completado</p>
                 <p>- Al menos un código debe ser ingresado.</p>
+              </Alert>
+            </>
+          )}
+          {showAlertRepeat && (
+            <>
+              <Alert
+                variant="danger"
+                onClose={() => setShowAlertRepeat(false)}
+                dismissible
+              >
+                <b>Producto repetido</b>
+                <p>
+                  - Al menos código de barras, código simple o descripción
+                  coincide con algún producto de la lista.
+                </p>
               </Alert>
             </>
           )}
