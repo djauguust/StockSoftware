@@ -1,6 +1,8 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Button, Form, Modal } from "react-bootstrap";
+import { Alert, Button, Form, InputGroup, Modal } from "react-bootstrap";
 import { useForm } from "../../hooks/useForm";
+import { obtenerFechaHoraEvento } from "../../hooks/getTime";
+import { siguienteValorAlMaximo } from "../../hooks/getNextId";
 
 /* Anexo LocalStorage: esto me permite controlar mi lista de compras momentáneamente */
 let compra = JSON.parse(localStorage.getItem("compra"));
@@ -15,6 +17,7 @@ if (!compra) {
       amount: "50",
       weigth: "-",
       idUser: "AdminPrueba",
+      id: 1,
     },
     {
       time: "12/1/2024 12:08",
@@ -25,6 +28,7 @@ if (!compra) {
       amount: "24",
       weigth: "-",
       idUser: "AdminPrueba",
+      id: 2,
     },
     {
       time: "28/12/2023 18:12",
@@ -35,6 +39,7 @@ if (!compra) {
       amount: "50",
       weigth: "-",
       idUser: "AdminPrueba",
+      id: 3,
     },
     {
       time: "2/1/2024 18:12",
@@ -45,6 +50,7 @@ if (!compra) {
       amount: "2",
       weigth: "5",
       idUser: "AdminPrueba",
+      id: 4,
     },
     {
       time: "21/1/2024 18:12",
@@ -55,6 +61,7 @@ if (!compra) {
       amount: "-",
       weigth: "25",
       idUser: "AdminPrueba",
+      id: 5,
     },
   ];
   localStorage.setItem("compra", JSON.stringify(compras));
@@ -73,8 +80,18 @@ export const ListaCompras = () => {
     weigth: "",
     userId: "",
   };
+  const [actualizar, setActualizar] = useState(false);
+  const actualizador = () => {
+    setActualizar(!actualizar);
+  };
 
-  const { formState, onInputChange, onResetForm } = useForm(initialForm);
+  const [listado, setListado] = useState(compra);
+  useEffect(() => {
+    setListado(JSON.parse(localStorage.getItem("compra")));
+  }, [actualizar]);
+
+  const { formState, onInputChange, onResetForm, setFormState } =
+    useForm(initialForm);
 
   const [showModal, setShowModal] = useState(false);
   const [addMode, setAddMode] = useState(true);
@@ -98,57 +115,118 @@ export const ListaCompras = () => {
     }
   }, [showModal]);
 
-  const handleSubmit = () => {
+  const [oldPurchase, setOldPurchase] = useState(null);
+
+  const handleSubmit = (objeto) => {
     setShowAlert(false);
     if (
-      objeto.description == "" ||
-      (objeto.shortCode == "" && objeto.largeCode == "")
+      (objeto.amount == "" && objeto.weigth == "") ||
+      (objeto.shortCode == "" && objeto.largeCode == "") ||
+      objeto.price == ""
     ) {
       setShowAlert(true);
       return;
     }
-    let repeat = listado.findIndex(
-      (l) =>
-        l.largeCode == objeto.largeCode ||
-        l.shortCode == objeto.shortCode ||
-        l.description == objeto.description
-    );
-    console.log(repeat);
-    if (repeat !== -1) {
-      setShowAlertRepeat(true);
-      return;
-    } else {
-      setShowAlertRepeat(false);
-    }
 
-    let nuevoCP = {
+    let nuevaC = {
       largeCode: formState.largeCode || "-",
       shortCode: formState.shortCode || "-",
-      description: formState.description,
+      price: formState.price,
+      amount: formState.amount || "-",
+      weigth: formState.weigth || "-",
+      /* LocalStorage */
+      product: formState.product,
+      idUser: JSON.parse(localStorage.getItem("usuarioLogueado")).user,
+      time: obtenerFechaHoraEvento(),
+      id: siguienteValorAlMaximo(listado),
+      /* /LocalStorage */
     };
+    console.log(nuevaC);
     if (addMode) {
-      agregarProducto(nuevoCP);
+      agregarCompra(nuevaC);
     } else {
       const index = parseInt(
         listado.findIndex(
           (p) =>
-            p.largeCode == oldProduct.largeCode &&
-            p.shortCode == oldProduct.shortCode &&
-            p.description == oldProduct.description
+            p.largeCode == oldPurchase.largeCode &&
+            p.shortCode == oldPurchase.shortCode &&
+            p.product == oldPurchase.product &&
+            p.price == oldPurchase.price &&
+            p.amount == oldPurchase.amount &&
+            p.weigth == oldPurchase.weigth
         )
       );
       if (index !== -1) {
-        let product = listado[index];
-        product.largeCode = nuevoCP.largeCode;
-        product.shortCode = nuevoCP.shortCode;
-        product.description = nuevoCP.description;
-        localStorage.setItem("producto", JSON.stringify(listado));
-        setOldProduct(null);
+        let purchase = compra[index];
+        purchase.largeCode = nuevaC.largeCode;
+        purchase.shortCode = nuevaC.shortCode;
+        purchase.product = nuevaC.product;
+        purchase.price = nuevaC.price;
+        purchase.amount = nuevaC.amount;
+        purchase.weigth = nuevaC.weigth;
+        localStorage.setItem("compra", JSON.stringify(compra));
+        setOldPurchase(null);
       }
     }
     setShowModal(false);
     onResetForm();
     actualizador();
+  };
+
+  const agregarCompra = (nueva) => {
+    /* Hago para LS */
+    console.log("first");
+    let nuevaLista = [...listado, nueva];
+    localStorage.setItem("compra", JSON.stringify(nuevaLista));
+  };
+
+  const handleSubmitEdit = (e) => {
+    let sAux = e.shortCode,
+      lAux = e.largeCode,
+      wAux = e.weigth,
+      aAux = e.amount;
+    if (e.shortCode == "-") {
+      sAux = "";
+    }
+    if (e.largeCode == "-") {
+      lAux = "";
+    }
+    if (e.weigth == "-") {
+      wAux = "";
+    }
+    if (e.amount == "-") {
+      aAux = "";
+    }
+    let editPurchase = {
+      largeCode: lAux,
+      shortCode: sAux,
+      product: e.product,
+      price: e.price,
+      amount: aAux,
+      weigth: wAux,
+    };
+    setOldPurchase(e);
+    setFormState(editPurchase);
+    setAddMode(false);
+    setShowModal(true);
+  };
+
+  const handleDelete = (purchase) => {
+    setToDelete(purchase);
+    setShowDeleteModal(true);
+  };
+
+  const handleSubmitDelete = () => {
+    /* Lo hago con LocalStorage */
+    const index = listado.findIndex((p) => p.id === toDelete.id);
+    if (index !== -1) {
+      listado.splice(index, 1);
+      localStorage.setItem("compra", JSON.stringify(listado));
+      handleClose();
+    } else {
+      console.log("eliminado sin exito");
+    }
+    /* /Lo hago con LocalStorage */
   };
   return (
     <>
@@ -192,9 +270,9 @@ export const ListaCompras = () => {
           </tr>
         </thead>
         <tbody>
-          {compra?.map((c, index) => (
+          {listado?.map((c, index) => (
             <tr key={index}>
-              <th scope="row">{index + 1} </th>
+              <th scope="row">{c.id} </th>
               <td>{c.time}</td>
               <td>{c.largeCode}</td>
               <td>{c.shortCode} </td>
@@ -204,13 +282,21 @@ export const ListaCompras = () => {
               <td>${c.price} </td>
               <td>{c.idUser} </td>
               <td>
-                <button type="button" className="btn btn-secondary me-2">
+                <button
+                  type="button"
+                  className="btn btn-secondary me-2"
+                  onClick={() => handleSubmitEdit(c)}
+                >
                   <i className="bi bi-pencil"></i>
                 </button>
                 <button type="button" className="btn btn-secondary me-2">
                   <i className="bi bi-eye"></i>
                 </button>
-                <button type="button" className="btn btn-danger">
+                <button
+                  type="button"
+                  className="btn btn-danger"
+                  onClick={() => handleDelete(c)}
+                >
                   <i className="bi bi-trash"></i>
                 </button>
               </td>
@@ -256,8 +342,8 @@ export const ListaCompras = () => {
                     as="textarea"
                     rows={3}
                     type="text"
-                    name="description"
-                    value={formState.description}
+                    name="product"
+                    value={formState.product}
                     onChange={onInputChange}
                   />
                 </Form.Group>
@@ -284,6 +370,20 @@ export const ListaCompras = () => {
                   />
                 </Form.Group>
               </div>
+              <div className="col-6">
+                <Form.Group className="mb-3" controlId="formCodBarra">
+                  <Form.Label>Precio Total</Form.Label>
+                  <InputGroup>
+                    <InputGroup.Text>$</InputGroup.Text>
+                    <Form.Control
+                      type="number"
+                      name="price"
+                      value={formState.price}
+                      onChange={onInputChange}
+                    />
+                  </InputGroup>
+                </Form.Group>
+              </div>
             </div>
           </Form>
           {showAlert && (
@@ -296,6 +396,7 @@ export const ListaCompras = () => {
                 <b>Formulario incompleto:</b>
                 <p>- Al menos un código debe ser ingresado.</p>
                 <p>- Al menos la cantidad o el peso debe ser ingresado.</p>
+                <p>- El precio total es obligatorio.</p>
               </Alert>
             </>
           )}
@@ -316,6 +417,33 @@ export const ListaCompras = () => {
             /* disabled={waitAxios} */
           >
             {addMode ? "Agregar" : "Guardar Cambios"}
+          </Button>
+        </Modal.Footer>
+      </Modal>
+
+      <Modal show={showDeleteModal} onHide={handleClose}>
+        <Modal.Header closeButton>
+          <Modal.Title>Confirmar eliminación de compra</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          ¿Realmente desea eliminar la compra <b>{toDelete?.product}</b>?
+        </Modal.Body>
+        <Modal.Footer>
+          <Button
+            variant="secondary"
+            onClick={handleClose}
+            /* disabled={waitAxios} */
+          >
+            Cerrar
+          </Button>
+          <Button
+            variant="danger"
+            onClick={() => {
+              handleSubmitDelete(toDelete);
+            }}
+            /* disabled={waitAxios} */
+          >
+            <b>Eliminar</b>
           </Button>
         </Modal.Footer>
       </Modal>

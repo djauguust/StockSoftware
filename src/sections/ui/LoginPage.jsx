@@ -10,6 +10,7 @@ if (!usuario) {
     { user: "gaston", password: "gaston", admin: true, nombre: "Gastón" },
     { user: "diurno", password: "diurno", admin: false, nombre: "Turno Mañana" },
     { user: "nocturno", password: "nocturno", admin: false, nombre: "Turno Tarde" },
+    { user: "admin", password: "admin", admin: true, nombre: "Admin Prueba" },
   ];
   localStorage.setItem("usuario", JSON.stringify(usuarios));
 }
