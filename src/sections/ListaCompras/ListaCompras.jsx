@@ -88,6 +88,7 @@ export const ListaCompras = () => {
   const [listado, setListado] = useState(compra);
   useEffect(() => {
     setListado(JSON.parse(localStorage.getItem("compra")));
+    setListaFiltrada(JSON.parse(localStorage.getItem("compra")));
   }, [actualizar]);
 
   const { formState, onInputChange, onResetForm, setFormState } =
@@ -228,6 +229,58 @@ export const ListaCompras = () => {
     }
     /* /Lo hago con LocalStorage */
   };
+
+  const [listaFiltrada, setListaFiltrada] = useState(listado);
+  const [bandera, setBandera] = useState(0);
+  useEffect(() => {
+    if (formState.searchText == "") setListaFiltrada(listado);
+    const value = formState.searchText;
+    let updatedData = [];
+    let aux = [];
+
+    if (value?.length) {
+      const filterFirstName =
+        listado &&
+        listado.filter((item) => {
+          const filter = item.product
+            .toLowerCase()
+            .includes(value.toLowerCase());
+
+          return filter ? filter : null;
+        });
+
+      const filterLastName =
+        listado &&
+        listado.filter((item) => {
+          let codigoString = item.largeCode.toString();
+          const filter = codigoString
+            .toLowerCase()
+            .includes(value.toLowerCase());
+
+          return filter ? filter : null;
+        });
+
+      const result = filterFirstName
+        ? filterFirstName.concat(filterLastName)
+        : aux;
+
+      updatedData = result.reduce((acc, item) => {
+        if (!acc.includes(item)) {
+          acc.push(item);
+        }
+        return acc;
+      }, []);
+      setListaFiltrada(updatedData);
+    } else {
+      setListaFiltrada(listado);
+    }
+  }, [formState.searchText, bandera]);
+
+  useEffect(() => {
+    if (!bandera) {
+      setBandera(1);
+    }
+  }, [listado]);
   return (
     <>
       <div className="mt-4"></div>
@@ -270,7 +323,7 @@ export const ListaCompras = () => {
           </tr>
         </thead>
         <tbody>
-          {listado?.map((c, index) => (
+          {listaFiltrada?.map((c, index) => (
             <tr key={index}>
               <th scope="row">{c.id} </th>
               <td>{c.time}</td>
