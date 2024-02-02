@@ -16,7 +16,7 @@ if (!compra) {
       price: "800",
       amount: "50",
       weigth: "-",
-      idUser: "AdminPrueba",
+      idUser: "admin",
       id: 1,
     },
     {
@@ -27,7 +27,7 @@ if (!compra) {
       price: "1200",
       amount: "24",
       weigth: "-",
-      idUser: "AdminPrueba",
+      idUser: "admin",
       id: 2,
     },
     {
@@ -38,7 +38,7 @@ if (!compra) {
       price: "800",
       amount: "50",
       weigth: "-",
-      idUser: "AdminPrueba",
+      idUser: "admin",
       id: 3,
     },
     {
@@ -49,7 +49,7 @@ if (!compra) {
       price: "23000",
       amount: "2",
       weigth: "5",
-      idUser: "AdminPrueba",
+      idUser: "admin",
       id: 4,
     },
     {
@@ -60,7 +60,7 @@ if (!compra) {
       price: "23000",
       amount: "-",
       weigth: "25",
-      idUser: "AdminPrueba",
+      idUser: "admin",
       id: 5,
     },
   ];
@@ -224,6 +224,7 @@ export const ListaCompras = () => {
       listado.splice(index, 1);
       localStorage.setItem("compra", JSON.stringify(listado));
       handleClose();
+      actualizador();
     } else {
       console.log("eliminado sin exito");
     }

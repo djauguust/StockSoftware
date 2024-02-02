@@ -11,7 +11,11 @@ export function obtenerFechaHoraEvento() {
   let segundos = fechaHoraActual.getSeconds();
 
   // Formatear la fecha y hora como una cadena
-  let fechaHoraFormateada = `${dia}/${mes}/${año} ${horas}:${minutos}:${segundos}`;
+  let fechaHoraFormateada = `${dia}/${mes}/${año} ${
+    horas < 10 ? `0` : ``
+  }${horas}:${minutos < 10 ? `0` : ``}${minutos}:${
+    segundos < 10 ? `0` : ``
+  }${segundos}`;
 
   // Devolver la cadena formateada
   return fechaHoraFormateada;
