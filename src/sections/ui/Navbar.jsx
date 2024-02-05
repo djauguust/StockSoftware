@@ -6,12 +6,22 @@ export const Navbar = () => {
   let usuario = JSON.parse(localStorage.getItem("usuarioLogueado"));
   const [user, setUser] = useState(null);
   const navigate = useNavigate();
-
+  const [isActive, setIsActive] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
   const onLogin = () => {
     navigate("/login", {
       replace: true,
     });
   };
+
+  useEffect(() => {
+    if (usuario) {
+      setIsActive(true);
+    }
+    if (usuario.admin) {
+      setIsAdmin(true);
+    }
+  }, []);
 
   const onLogout = () => {
     localStorage.setItem("usuarioLogueado", null);
@@ -19,6 +29,8 @@ export const Navbar = () => {
       replace: true,
     });
   };
+
+  const toAdmin = () => {};
   return (
     <>
       <nav
@@ -41,29 +53,35 @@ export const Navbar = () => {
                     
                     Gastón
                 </Link> */}
-          Sistema de Stock
+
           <div className="collapse navbar-collapse" id="navbarTogglerDemo01">
             <div className="navbar-collapse">
               <div className="navbar-nav">
-                {/* <NavLink
-                                className={({ isActive }) =>
-                                    `nav-item nav-link ${isActive ? "active" : ""
-                                    } `
-                                }
-                                to="/home"
-                            >
-                                Inicio
-                            </NavLink>
+                <NavLink
+                  className={({ isActive }) =>
+                    `nav-item nav-link ${isActive ? "active" : ""} `
+                  }
+                  to="/home"
+                >
+                  Sistema de Stock
+                </NavLink>
 
-                            <NavLink
-                                className={({ isActive }) =>
-                                    `nav-item nav-link ${isActive ? "active" : ""
-                                    } `
-                                }
-                                to="/carrera"
-                            >
-                                Ingeniería en Computación
-                            </NavLink> */}
+                <NavLink
+                  className={({ isActive }) =>
+                    `nav-item nav-link ${isActive ? "active" : ""} `
+                  }
+                  to="/ventas"
+                >
+                  Egresos
+                </NavLink>
+                <NavLink
+                  className={({ isActive }) =>
+                    `nav-item nav-link ${isActive ? "active" : ""} `
+                  }
+                  to="/compras"
+                >
+                  Ingresos
+                </NavLink>
               </div>
             </div>
 
@@ -81,15 +99,16 @@ export const Navbar = () => {
                       id="basic-nav-dropdown"
                       className="text-white"
                     >
-                      {/* <NavDropdown.Item onClick={toPerfil}>
-                        Perfil
-                      </NavDropdown.Item>
-                      <NavDropdown.Item onClick={toConfiguracion}>
-                        Configuración
-                      </NavDropdown.Item>
-                      <NavDropdown.Divider />
-                      <NavDropdown.Item href="">
-                    </NavDropdown.Item> */}
+                      {isAdmin ? (
+                        <>
+                          <NavDropdown.Item onClick={toAdmin}>
+                            Administración
+                          </NavDropdown.Item>
+                          <NavDropdown.Divider />
+                        </>
+                      ) : (
+                        ``
+                      )}
                       <Button
                         variant="danger"
                         onClick={onLogout}
