@@ -9,10 +9,10 @@ export const App = () => {
   return (
     <>
       <div className="container-fluid px-5">
+        <ListaVentas />
         <ListaCompras />
         <ListaCodigos />
         <ListaStock />
-        <ListaVentas />
       </div>
     </>
   );

@@ -83,15 +83,12 @@ export const ListaCompras = () => {
   const [actualizar, setActualizar] = useState(false);
   const actualizador = () => {
     setActualizar(!actualizar);
-    console.log("actualicé");
   };
 
   const [listado, setListado] = useState(compra);
   useEffect(() => {
     setListado(JSON.parse(localStorage.getItem("compra")));
     setListaFiltrada(JSON.parse(localStorage.getItem("compra")));
-    console.log(listaFiltrada);
-    console.log("cargué listado y listfiltrado");
   }, [actualizar]);
 
   const { formState, onInputChange, onResetForm, setFormState } =
