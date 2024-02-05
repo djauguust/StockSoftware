@@ -83,12 +83,15 @@ export const ListaCompras = () => {
   const [actualizar, setActualizar] = useState(false);
   const actualizador = () => {
     setActualizar(!actualizar);
+    console.log("actualicé");
   };
 
   const [listado, setListado] = useState(compra);
   useEffect(() => {
     setListado(JSON.parse(localStorage.getItem("compra")));
     setListaFiltrada(JSON.parse(localStorage.getItem("compra")));
+    console.log(listaFiltrada);
+    console.log("cargué listado y listfiltrado");
   }, [actualizar]);
 
   const { formState, onInputChange, onResetForm, setFormState } =
@@ -146,17 +149,9 @@ export const ListaCompras = () => {
     if (addMode) {
       agregarCompra(nuevaC);
     } else {
-      const index = parseInt(
-        listado.findIndex(
-          (p) =>
-            p.largeCode == oldPurchase.largeCode &&
-            p.shortCode == oldPurchase.shortCode &&
-            p.product == oldPurchase.product &&
-            p.price == oldPurchase.price &&
-            p.amount == oldPurchase.amount &&
-            p.weigth == oldPurchase.weigth
-        )
-      );
+      console.log("first");
+      const index = parseInt(listado.findIndex((p) => p.id == oldPurchase.id));
+      console.log(index);
       if (index !== -1) {
         let purchase = compra[index];
         purchase.largeCode = nuevaC.largeCode;
@@ -166,7 +161,8 @@ export const ListaCompras = () => {
         purchase.amount = nuevaC.amount;
         purchase.weigth = nuevaC.weigth;
         localStorage.setItem("compra", JSON.stringify(compra));
-        setOldPurchase(null);
+        /* setOldPurchase(null); */
+        actualizador();
       }
     }
     setShowModal(false);
@@ -205,6 +201,7 @@ export const ListaCompras = () => {
       price: e.price,
       amount: aAux,
       weigth: wAux,
+      id: e.id,
     };
     setOldPurchase(e);
     setFormState(editPurchase);
