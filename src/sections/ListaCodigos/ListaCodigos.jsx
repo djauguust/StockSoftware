@@ -7,23 +7,19 @@ let producto = JSON.parse(localStorage.getItem("producto"));
 if (!producto) {
   let productos = [
     {
-      largeCode: 7002384917,
-      shortCode: "-",
+      code: 7002384917,
       description: "Papas Fritas LAYS 500g.",
     },
     {
-      largeCode: 7283944172,
-      shortCode: "-",
+      code: 7283944172,
       description: "COCA-COLA 3Lts",
     },
     {
-      largeCode: 20398299,
-      shortCode: "-",
+      code: 20398299,
       description: "Chocolate BLOCK 600g.",
     },
     {
-      largeCode: "-",
-      shortCode: 10,
+      code: 10,
       description: "Pan",
     },
   ];
@@ -34,8 +30,7 @@ if (!producto) {
 export const ListaCodigos = () => {
   const initialForm = {
     searchText: "",
-    largeCode: "",
-    shortCode: "",
+    code: "",
     description: "",
   };
 
@@ -68,20 +63,14 @@ export const ListaCodigos = () => {
   const handleSubmit = (objeto) => {
     setShowAlert(false);
     setShowAlertRepeat(false);
-    if (
-      objeto.description == "" ||
-      (objeto.shortCode == "" && objeto.largeCode == "")
-    ) {
+    if (objeto.description == "" || objeto.code == "") {
       setShowAlert(true);
       return;
     }
     let repeat = listado.findIndex(
-      (l) =>
-        l.largeCode == objeto.largeCode ||
-        l.shortCode == objeto.shortCode ||
-        l.description == objeto.description
+      (l) => l.code == objeto.code || l.description == objeto.description
     );
-    
+
     if (repeat !== -1) {
       setShowAlertRepeat(true);
       return;
@@ -90,8 +79,7 @@ export const ListaCodigos = () => {
     }
 
     let nuevoCP = {
-      largeCode: formState.largeCode || "-",
-      shortCode: formState.shortCode || "-",
+      code: formState.code || "-",
       description: formState.description,
     };
     if (addMode) {
@@ -100,15 +88,12 @@ export const ListaCodigos = () => {
       const index = parseInt(
         listado.findIndex(
           (p) =>
-            p.largeCode == oldProduct.largeCode &&
-            p.shortCode == oldProduct.shortCode &&
-            p.description == oldProduct.description
+            p.code == oldProduct.code && p.description == oldProduct.description
         )
       );
       if (index !== -1) {
         let product = listado[index];
-        product.largeCode = nuevoCP.largeCode;
-        product.shortCode = nuevoCP.shortCode;
+        product.code = nuevoCP.code;
         product.description = nuevoCP.description;
         localStorage.setItem("producto", JSON.stringify(listado));
         setOldProduct(null);
@@ -151,17 +136,13 @@ export const ListaCodigos = () => {
 
   const [oldProduct, setOldProduct] = useState(null);
   const handleSubmitEdit = (e) => {
-    let sAux = e.shortCode,
-      lAux = e.largeCode;
-    if (e.shortCode == "-") {
-      sAux = "";
-    }
-    if (e.largeCode == "-") {
+    let lAux = e.code;
+
+    if (e.code == "-") {
       lAux = "";
     }
     let editProduct = {
-      largeCode: lAux,
-      shortCode: sAux,
+      code: lAux,
       description: e.description,
     };
     setOldProduct(e);
@@ -192,7 +173,7 @@ export const ListaCodigos = () => {
       const filterLastName =
         listado &&
         listado.filter((item) => {
-          let codigoString = item.largeCode.toString();
+          let codigoString = item.code.toString();
           const filter = codigoString
             .toLowerCase()
             .includes(value.toLowerCase());
@@ -268,7 +249,6 @@ export const ListaCodigos = () => {
           <tr>
             <th scope="col">#</th>
             <th scope="col">Código de Barras</th>
-            <th scope="col">Código simple</th>
             <th scope="col">Descripción</th>
             <th scope="col">Acciones</th>
           </tr>
@@ -277,8 +257,7 @@ export const ListaCodigos = () => {
           {listaFiltrada?.map((e, index) => (
             <tr key={index}>
               <th scope="row">{index + 1} </th>
-              <td>{e.largeCode}</td>
-              <td>{e.shortCode}</td>
+              <td>{e.code}</td>
               <td>{e.description} </td>
               <td>
                 <button
@@ -315,23 +294,12 @@ export const ListaCodigos = () => {
           >
             <div className="row mx-0">
               <div className="col-6">
-                <Form.Group className="mb-3" controlId="formCodBarraShort">
-                  <Form.Label>Código Simple</Form.Label>
-                  <Form.Control
-                    type="number"
-                    name="shortCode"
-                    value={formState.shortCode}
-                    onChange={onInputChange}
-                  />
-                </Form.Group>
-              </div>
-              <div className="col-6">
                 <Form.Group className="mb-3" controlId="formCodBarra">
                   <Form.Label>Código de Barras</Form.Label>
                   <Form.Control
                     type="number"
-                    name="largeCode"
-                    value={formState.largeCode}
+                    name="code"
+                    value={formState.code}
                     onChange={onInputChange}
                     ref={campoDeEntradaRef}
                   />

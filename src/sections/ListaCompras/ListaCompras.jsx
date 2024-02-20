@@ -10,8 +10,7 @@ if (!compra) {
   let compras = [
     {
       time: "18/1/2024 08:12",
-      largeCode: 7002384917,
-      shortCode: "-",
+      code: 7002384917,
       product: "Papas Fritas LAYS 500g.",
       price: "800",
       amount: "50",
@@ -21,8 +20,7 @@ if (!compra) {
     },
     {
       time: "12/1/2024 12:08",
-      largeCode: 7283944172,
-      shortCode: "-",
+      code: 7283944172,
       product: "COCA-COLA 3Lts",
       price: "1200",
       amount: "24",
@@ -32,8 +30,7 @@ if (!compra) {
     },
     {
       time: "28/12/2023 18:12",
-      largeCode: 20398299,
-      shortCode: "-",
+      code: 20398299,
       product: "Chocolate BLOCK 600g.",
       price: "800",
       amount: "50",
@@ -43,8 +40,7 @@ if (!compra) {
     },
     {
       time: "2/1/2024 18:12",
-      largeCode: 1652336641,
-      shortCode: "-",
+      code: 1652336641,
       product: "Palladini JAMÓN",
       price: "23000",
       amount: "2",
@@ -54,8 +50,7 @@ if (!compra) {
     },
     {
       time: "21/1/2024 18:12",
-      largeCode: "-",
-      shortCode: 10,
+      code: 10,
       product: "Pan",
       price: "23000",
       amount: "-",
@@ -72,8 +67,7 @@ export const ListaCompras = () => {
   const initialForm = {
     searchText: "",
     time: "",
-    largeCode: "",
-    shortCode: "",
+    code: "",
     product: "",
     price: "",
     amount: "",
@@ -122,7 +116,7 @@ export const ListaCompras = () => {
     setShowAlert(false);
     if (
       (objeto.amount == "" && objeto.weigth == "") ||
-      (objeto.shortCode == "" && objeto.largeCode == "") ||
+      objeto.code == "" ||
       objeto.price == ""
     ) {
       setShowAlert(true);
@@ -130,8 +124,7 @@ export const ListaCompras = () => {
     }
 
     let nuevaC = {
-      largeCode: formState.largeCode || "-",
-      shortCode: formState.shortCode || "-",
+      code: formState.code || "-",
       price: formState.price,
       amount: formState.amount || "-",
       weigth: formState.weigth || "-",
@@ -151,8 +144,7 @@ export const ListaCompras = () => {
       console.log(index);
       if (index !== -1) {
         let purchase = compra[index];
-        purchase.largeCode = nuevaC.largeCode;
-        purchase.shortCode = nuevaC.shortCode;
+        purchase.code = nuevaC.code;
         purchase.product = nuevaC.product;
         purchase.price = nuevaC.price;
         purchase.amount = nuevaC.amount;
@@ -175,14 +167,11 @@ export const ListaCompras = () => {
   };
 
   const handleSubmitEdit = (e) => {
-    let sAux = e.shortCode,
-      lAux = e.largeCode,
+    let lAux = e.code,
       wAux = e.weigth,
       aAux = e.amount;
-    if (e.shortCode == "-") {
-      sAux = "";
-    }
-    if (e.largeCode == "-") {
+
+    if (e.code == "-") {
       lAux = "";
     }
     if (e.weigth == "-") {
@@ -192,8 +181,7 @@ export const ListaCompras = () => {
       aAux = "";
     }
     let editPurchase = {
-      largeCode: lAux,
-      shortCode: sAux,
+      code: lAux,
       product: e.product,
       price: e.price,
       amount: aAux,
@@ -247,7 +235,7 @@ export const ListaCompras = () => {
       const filterLastName =
         listado &&
         listado.filter((item) => {
-          let codigoString = item.largeCode.toString();
+          let codigoString = item.code.toString();
           const filter = codigoString
             .toLowerCase()
             .includes(value.toLowerCase());
@@ -308,7 +296,6 @@ export const ListaCompras = () => {
             <th scope="col">#</th>
             <th scope="col">Fecha y Hora</th>
             <th scope="col">Código de Barras</th>
-            <th scope="col">Código Simple</th>
             <th scope="col">Producto</th>
             <th scope="col">Cantidad</th>
             <th scope="col">Peso (en Kg)</th>
@@ -322,8 +309,7 @@ export const ListaCompras = () => {
             <tr key={index}>
               <th scope="row">{c.id} </th>
               <td>{c.time}</td>
-              <td>{c.largeCode}</td>
-              <td>{c.shortCode} </td>
+              <td>{c.code}</td>
               <td>{c.product} </td>
               <td>{c.amount} </td>
               <td>{c.weigth} </td>
@@ -361,23 +347,12 @@ export const ListaCompras = () => {
           <Form>
             <div className="row mx-0">
               <div className="col-6">
-                <Form.Group className="mb-3" controlId="formCodBarraShort">
-                  <Form.Label>Código Simple</Form.Label>
-                  <Form.Control
-                    type="number"
-                    name="shortCode"
-                    value={formState.shortCode}
-                    onChange={onInputChange}
-                  />
-                </Form.Group>
-              </div>
-              <div className="col-6">
                 <Form.Group className="mb-3" controlId="formCodBarra">
                   <Form.Label>Código de Barras</Form.Label>
                   <Form.Control
                     type="number"
-                    name="largeCode"
-                    value={formState.largeCode}
+                    name="code"
+                    value={formState.code}
                     onChange={onInputChange}
                     ref={campoDeEntradaRef}
                   />
@@ -397,7 +372,7 @@ export const ListaCompras = () => {
                 </Form.Group>
               </div>
               <div className="col-6">
-                <Form.Group className="mb-3" controlId="formCodBarraShort">
+                <Form.Group className="mb-3" controlId="formAmount">
                   <Form.Label>Cantidad</Form.Label>
                   <Form.Control
                     type="number"

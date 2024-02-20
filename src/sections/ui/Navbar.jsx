@@ -7,7 +7,7 @@ export const Navbar = () => {
   const [user, setUser] = useState(null);
   const navigate = useNavigate();
   const [isActive, setIsActive] = useState(false);
-  const [isAdmin, setIsAdmin] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(true);
   const onLogin = () => {
     navigate("/login", {
       replace: true,
@@ -30,7 +30,31 @@ export const Navbar = () => {
     });
   };
 
-  const toAdmin = () => {};
+  const toAdmin = () => {
+    navigate("/login", {
+      replace: true,
+    });
+  };
+  const toVentas = () => {
+    navigate("/ventas", {
+      replace: true,
+    });
+  };
+  const toCompras = () => {
+    navigate("/compras", {
+      replace: true,
+    });
+  };
+  const toStock = () => {
+    navigate("/stock", {
+      replace: true,
+    });
+  };
+  const toCodigos = () => {
+    navigate("/codigos", {
+      replace: true,
+    });
+  };
   return (
     <>
       <nav
@@ -72,7 +96,7 @@ export const Navbar = () => {
                   }
                   to="/ventas"
                 >
-                  Egresos
+                  Ventas
                 </NavLink>
                 <NavLink
                   className={({ isActive }) =>
@@ -103,6 +127,18 @@ export const Navbar = () => {
                         <>
                           <NavDropdown.Item onClick={toAdmin}>
                             Administración
+                          </NavDropdown.Item>
+                          <NavDropdown.Item onClick={toStock}>
+                            Control de Stock
+                          </NavDropdown.Item>
+                          <NavDropdown.Item onClick={toCodigos}>
+                            Lista de Códigos
+                          </NavDropdown.Item>
+                          <NavDropdown.Item onClick={toVentas}>
+                            Lista de Ventas
+                          </NavDropdown.Item>
+                          <NavDropdown.Item onClick={toCompras}>
+                            Lista de Compras
                           </NavDropdown.Item>
                           <NavDropdown.Divider />
                         </>
