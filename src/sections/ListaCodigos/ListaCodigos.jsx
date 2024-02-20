@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Alert, Button, Form, Modal } from "react-bootstrap";
 import { useForm } from "../../hooks/useForm";
+import axios from "axios";
 
 /* Anexo LocalStorage: esto me permite controlar mi lista de códigos momentáneamente */
 let producto = JSON.parse(localStorage.getItem("producto"));
@@ -34,19 +35,28 @@ export const ListaCodigos = () => {
     description: "",
   };
 
+  const [actualizar, setActualizar] = useState(false);
+  const actualizador = () => {
+    setActualizar(!actualizar);
+    console.log("actualice");
+  };
+
+  const url = import.meta.env.VITE_URL_BACKEND;
+
+  const [backend, setBackend] = useState(null);
+  useEffect(() => {
+    axios.get(`${url}/codigos`).then(({ data }) => {
+      console.log(data);
+      setListado(data);
+      setListaFiltrada(data);
+    });
+  }, [actualizar]);
+
   const { formState, onInputChange, onResetForm, setFormState } =
     useForm(initialForm);
   const [showModal, setShowModal] = useState(false);
   const [listado, setListado] = useState();
-  const [actualizar, setActualizar] = useState(false);
-  const actualizador = () => {
-    setActualizar(!actualizar);
-  };
-
-  useEffect(() => {
-    setListado(JSON.parse(localStorage.getItem("producto")));
-    setListaFiltrada(JSON.parse(localStorage.getItem("producto")));
-  }, [actualizar]);
+  const [waitAxios, setWaitAxios] = useState(false);
 
   const handleClose = () => {
     setShowModal(false);
@@ -55,12 +65,14 @@ export const ListaCodigos = () => {
     setShowAlert(false);
     setShowAlertRepeat(false);
     onResetForm();
+    setWaitAxios(false);
     actualizador();
   };
   const [addMode, setAddMode] = useState(true);
   const [showAlertRepeat, setShowAlertRepeat] = useState(false);
 
   const handleSubmit = (objeto) => {
+    setWaitAxios(true);
     setShowAlert(false);
     setShowAlertRepeat(false);
     if (objeto.description == "" || objeto.code == "") {
@@ -71,8 +83,9 @@ export const ListaCodigos = () => {
       (l) => l.code == objeto.code || l.description == objeto.description
     );
 
-    if (repeat !== -1) {
+    if (repeat !== -1 && addMode) {
       setShowAlertRepeat(true);
+      setWaitAxios(false);
       return;
     } else {
       setShowAlertRepeat(false);
@@ -92,24 +105,39 @@ export const ListaCodigos = () => {
         )
       );
       if (index !== -1) {
-        let product = listado[index];
-        product.code = nuevoCP.code;
-        product.description = nuevoCP.description;
-        localStorage.setItem("producto", JSON.stringify(listado));
-        setOldProduct(null);
+        axios
+          .put(`${url}/codigos/${oldProduct.code}`, nuevoCP)
+          .then(({ data }) => {
+            console.log(data);
+            setOldProduct(null);
+            actualizador();
+          })
+          .catch(({ response }) => {
+            console.log(response.data);
+          });
       }
     }
-    setShowModal(false);
-    onResetForm();
-    actualizador();
+    setTimeout(function () {
+      setWaitAxios(false);
+      setShowModal(false);
+      onResetForm();
+      actualizador();
+    }, 500);
   };
 
   const [showAlert, setShowAlert] = useState(false);
 
   const agregarProducto = (nuevo) => {
-    /* hago para local storage */
-    let nuevaLista = [...listado, nuevo];
-    localStorage.setItem("producto", JSON.stringify(nuevaLista));
+    axios
+      .post(`${url}/codigos`, nuevo)
+      .then(({ data }) => {
+        console.log(data);
+        actualizador();
+      })
+      .catch(({ response }) => {
+        console.log(response.data);
+      });
+    return;
   };
 
   const [toDelete, setToDelete] = useState(null);
@@ -120,16 +148,31 @@ export const ListaCodigos = () => {
   };
 
   const handleSubmitDelete = () => {
-    /* Lo hago con LocalStorage */
+    setWaitAxios(true);
     const index = listado.findIndex(
       (p) => p.description === toDelete.description
     );
     if (index !== -1) {
-      listado.splice(index, 1);
-      localStorage.setItem("producto", JSON.stringify(listado));
-      handleClose();
+      axios
+        .delete(`${url}/codigos/${toDelete.code}`)
+        .then(({ data }) => {
+          console.log(data);
+          actualizador();
+        })
+        .catch(({ response }) => {
+          console.log(response.data);
+        });
+      setTimeout(function () {
+        console.log("first");
+        setWaitAxios(false);
+        setShowModal(false);
+        onResetForm();
+        handleClose();
+        actualizador();
+      }, 500);
     } else {
       console.log("eliminado sin exito");
+      setWaitAxios(false);
     }
     /* /Lo hago con LocalStorage */
   };
@@ -342,8 +385,8 @@ export const ListaCodigos = () => {
               >
                 <b>Producto repetido</b>
                 <p>
-                  - Al menos código de barras, código simple o descripción
-                  coincide con algún producto de la lista.
+                  - Al menos código de barras o descripción coincide con algún
+                  producto de la lista.
                 </p>
               </Alert>
             </>
@@ -353,7 +396,7 @@ export const ListaCodigos = () => {
           <Button
             variant="secondary"
             onClick={handleClose}
-            /* disabled={waitAxios} */
+            disabled={waitAxios}
           >
             Cerrar
           </Button>
@@ -362,7 +405,7 @@ export const ListaCodigos = () => {
             onClick={() => {
               handleSubmit(formState);
             }}
-            /* disabled={waitAxios} */
+            disabled={waitAxios}
           >
             {addMode ? "Agregar" : "Guardar Cambios"}
           </Button>
@@ -379,7 +422,7 @@ export const ListaCodigos = () => {
           <Button
             variant="secondary"
             onClick={handleClose}
-            /* disabled={waitAxios} */
+            disabled={waitAxios}
           >
             Cerrar
           </Button>
@@ -388,7 +431,7 @@ export const ListaCodigos = () => {
             onClick={() => {
               handleSubmitDelete(toDelete);
             }}
-            /* disabled={waitAxios} */
+            disabled={waitAxios}
           >
             <b>Eliminar</b>
           </Button>
