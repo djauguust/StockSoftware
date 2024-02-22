@@ -1,10 +1,10 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { Button, Form, InputGroup, NavDropdown } from "react-bootstrap";
 import { Link, NavLink, useNavigate } from "react-router-dom";
+import { LoginContext } from "../../context/LoginContext";
 
 export const Navbar = () => {
-  let usuario = JSON.parse(localStorage.getItem("usuarioLogueado"));
-  const [user, setUser] = useState(null);
+  const { user, setUser, setToken, setIsLoggedIn } = useContext(LoginContext);
   const navigate = useNavigate();
   const [isActive, setIsActive] = useState(false);
   const [isAdmin, setIsAdmin] = useState(true);
@@ -13,18 +13,22 @@ export const Navbar = () => {
       replace: true,
     });
   };
-
+  console.log(user);
   useEffect(() => {
-    if (usuario) {
+    if (user) {
       setIsActive(true);
+    } else {
+      setIsActive(false);
     }
-    if (usuario.admin) {
+    if (user?.rol == 2) {
       setIsAdmin(true);
+    } else {
+      setIsAdmin(false);
     }
   }, []);
-
+  console.log(user);
   const onLogout = () => {
-    localStorage.setItem("usuarioLogueado", null);
+    setUser(null);
     navigate("/login", {
       replace: true,
     });
@@ -112,14 +116,14 @@ export const Navbar = () => {
             <div className="row">
               {/* Sin loguear */}
               <div className="col-lg-4 col-12">
-                {!usuario ? (
+                {!user ? (
                   <Button variant="success" onClick={onLogin}>
                     Ingresar
                   </Button>
                 ) : (
                   <div className="navbar-nav text-white">
                     <NavDropdown
-                      title={`${usuario.nombre}`}
+                      title={`${user.nombre}`}
                       id="basic-nav-dropdown"
                       className="text-white"
                     >

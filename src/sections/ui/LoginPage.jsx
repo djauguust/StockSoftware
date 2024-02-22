@@ -1,29 +1,21 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { Alert, Button, Form } from "react-bootstrap";
 import { useForm } from "../../hooks/useForm";
 import { useNavigate } from "react-router-dom";
-
-/* Anexo LocalStorage: esto me permite controlar que siempre estén los 3 usuarios presentes */
-let usuario = JSON.parse(localStorage.getItem("usuario"));
-if (!usuario) {
-  let usuarios = [
-    { user: "gaston", password: "gaston", admin: true, nombre: "Gastón" },
-    { user: "diurno", password: "diurno", admin: false, nombre: "Turno Mañana" },
-    { user: "nocturno", password: "nocturno", admin: false, nombre: "Turno Tarde" },
-    { user: "admin", password: "admin", admin: true, nombre: "Admin Prueba" },
-  ];
-  localStorage.setItem("usuario", JSON.stringify(usuarios));
-}
-/* Fin anexo LocalStorage */
+import axios from "axios";
+import { LoginContext } from "../../context/LoginContext";
 
 export const LoginPage = () => {
   const [validated, setValidated] = useState(false);
+  const { user, setUser, setToken, setIsLoggedIn } = useContext(LoginContext);
+  const [usuarioLogueadoError, setUsuarioLogueadoError] = useState(false);
 
+  const url = import.meta.env.VITE_URL_BACKEND;
   const navigate = useNavigate();
 
   const initialForm = {
-    user: "",
-    password: "",
+    email: "",
+    contrasenia: "",
   };
 
   const { formState, onInputChange, onResetForm } = useForm(initialForm);
@@ -41,8 +33,31 @@ export const LoginPage = () => {
 
   const loguearse = (datos) => {
     /* Abajo iría la consulta al backend */
-    let logueo = usuario.find(
-      (p) => p.user == datos.user && p.password == datos.password
+    axios
+      .post(`${url}/login`, datos)
+      .then(({ data }) => {
+        setIsLoggedIn(true);
+        setUser(data.data);
+        // Guardo el token en el estado o en el LocalStorage si es necesario
+        const jwtToken = data.data.token;
+        setUsuarioLogueadoError(false); // No olvides manejar el estado de error
+
+        // Aquí puedes decidir si deseas guardar el token en el estado o en LocalStorage
+        setToken(jwtToken);
+
+        navigate("/", {
+          replace: true,
+        });
+      })
+      .catch(({ response }) => {
+        console.log(response);
+        setIsLoggedIn(false);
+        setUser(null);
+        setToken(null);
+      });
+    console.log(user);
+    /* let logueo = usuario.find(
+      (p) => p.email == datos.email && p.contrasenia == datos.contrasenia
     );
     if (!logueo) {
       setShowAlert(true);
@@ -53,7 +68,7 @@ export const LoginPage = () => {
       navigate("/", {
         replace: true,
       });
-    }
+    } */
     /* Arriba iría la consulta al backend */
   };
 
@@ -76,12 +91,12 @@ export const LoginPage = () => {
         <div className="container mt-5 col-6">
           <h1>Iniciar Sesión</h1>
           <Form noValidate validated={validated} onSubmit={onLogin}>
-            <Form.Group className="mb-3" controlId="formUser">
+            <Form.Group className="mb-3" controlId="formemail">
               <Form.Label>Usuario</Form.Label>
               <Form.Control
-                type="user"
-                value={formState.user}
-                name="user"
+                type="email"
+                value={formState.email}
+                name="email"
                 onChange={onInputChange}
                 required
               />
@@ -90,8 +105,8 @@ export const LoginPage = () => {
               <Form.Label>Contraseña</Form.Label>
               <Form.Control
                 type="password"
-                value={formState.password}
-                name="password"
+                value={formState.contrasenia}
+                name="contrasenia"
                 onChange={onInputChange}
                 onKeyDown={enterPulsed}
                 required
