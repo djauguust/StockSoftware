@@ -45,7 +45,7 @@ export const ListaCodigos = () => {
 
   const [backend, setBackend] = useState(null);
   useEffect(() => {
-    axios.get(`${url}/codigos`).then(({ data }) => {
+    axios.get(`${url}/codigos/`).then(({ data }) => {
       setListado(data);
       setListaFiltrada(data);
     });
