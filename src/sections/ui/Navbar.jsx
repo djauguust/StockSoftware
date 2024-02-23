@@ -13,7 +13,7 @@ export const Navbar = () => {
       replace: true,
     });
   };
-  console.log(user);
+  
   useEffect(() => {
     if (user) {
       setIsActive(true);
@@ -25,8 +25,8 @@ export const Navbar = () => {
     } else {
       setIsAdmin(false);
     }
-  }, []);
-  console.log(user);
+  }, [user]);
+  
   const onLogout = () => {
     setUser(null);
     navigate("/login", {
