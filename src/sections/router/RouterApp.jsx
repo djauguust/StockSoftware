@@ -9,6 +9,7 @@ import { ListaCodigos } from "../ListaCodigos/ListaCodigos";
 import { UIVentas } from "../ListaVentas/UIVentas";
 import { Navbar } from "../ui/Navbar";
 import { LoginContext } from "../../context/LoginContext";
+import { Error404 } from "../ui/Error404";
 
 export const RouterApp = () => {
   // LoginContext
@@ -31,9 +32,16 @@ export const RouterApp = () => {
             <Route path="/codigos" element={<ListaCodigos />} />
           </>
         ) : (
-          <Route path="login" element={<LoginPage />} />
+          <Route path="/login" element={<LoginPage />} />
         )}
-        <Route path="/*" element={<App />} />
+        {user ? (
+          <>
+            <Route path="/" element={<App />} />
+          </>
+        ) : (
+          <Route path="/" element={<LoginPage />} />
+        )}
+        <Route path="/*" element={<Error404 />} />
       </Routes>
     </LoginContext.Provider>
   );
