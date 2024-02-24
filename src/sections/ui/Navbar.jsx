@@ -40,7 +40,7 @@ export const Navbar = () => {
     });
   };
   const toVentas = () => {
-    navigate("/ventas", {
+    navigate("/listaVentas", {
       replace: true,
     });
   };
@@ -89,7 +89,7 @@ export const Navbar = () => {
                   className={({ isActive }) =>
                     `nav-item nav-link ${isActive ? "active" : ""} `
                   }
-                  to="/home"
+                  to="/"
                 >
                   Sistema de Stock
                 </NavLink>
