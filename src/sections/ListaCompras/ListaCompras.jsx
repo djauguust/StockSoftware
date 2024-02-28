@@ -115,19 +115,22 @@ export const ListaCompras = () => {
     }
     setTimeout(function () {
       setWaitAxios(false);
-      setShowModal(false);
       onResetForm();
       actualizador();
+      campoDeEntradaRef.current.focus();
     }, 500);
 
   };
 
   const agregarCompra = (nueva) => {
-    axios.post(`${url}/compras/`, nueva).then(({ data }) => {
-      console.log(data.message)
-    }).catch((error) => {
-      console.log(error)
-    });
+    axios.post(`${url}/compras/`, nueva)
+      .then(({ data }) => {
+        console.log(data.message)
+      })
+      .catch((error) => {
+        console.log(error)
+      });
+    return
   };
 
   const handleSubmitEdit = (e) => {
@@ -270,6 +273,13 @@ export const ListaCompras = () => {
       /* formState.product = "Producto no encontrado" */
     }
 
+  }
+
+  const onEnterPulsed = (event) => {
+    if (event.key === "Enter") {
+      event.preventDefault();
+      handleSubmit(formState)
+    }
   }
 
   return (
@@ -416,6 +426,7 @@ export const ListaCompras = () => {
                       name="price"
                       value={formState.price}
                       onChange={onInputChange}
+                      onKeyDown={onEnterPulsed}
                     />
                   </InputGroup>
                 </Form.Group>
