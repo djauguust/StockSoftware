@@ -1,32 +1,8 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useContext, useEffect, useRef, useState } from "react";
 import { Alert, Button, Form, Modal } from "react-bootstrap";
 import { useForm } from "../../hooks/useForm";
 import axios from "axios";
-
-/* Anexo LocalStorage: esto me permite controlar mi lista de códigos momentáneamente */
-let producto = JSON.parse(localStorage.getItem("producto"));
-if (!producto) {
-  let productos = [
-    {
-      code: 7002384917,
-      description: "Papas Fritas LAYS 500g.",
-    },
-    {
-      code: 7283944172,
-      description: "COCA-COLA 3Lts",
-    },
-    {
-      code: 20398299,
-      description: "Chocolate BLOCK 600g.",
-    },
-    {
-      code: 10,
-      description: "Pan",
-    },
-  ];
-  localStorage.setItem("producto", JSON.stringify(productos));
-}
-/* Fin anexo LocalStorage */
+import { LoginContext } from "../../context/LoginContext";
 
 export const ListaCodigos = () => {
   const initialForm = {
@@ -43,7 +19,6 @@ export const ListaCodigos = () => {
 
   const url = import.meta.env.VITE_URL_BACKEND;
 
-  const [backend, setBackend] = useState(null);
   useEffect(() => {
     axios.get(`${url}/codigos/`).then(({ data }) => {
       setListado(data);

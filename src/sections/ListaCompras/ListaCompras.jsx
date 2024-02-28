@@ -1,67 +1,10 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useContext, useEffect, useRef, useState } from "react";
 import { Alert, Button, Form, InputGroup, Modal } from "react-bootstrap";
 import { useForm } from "../../hooks/useForm";
 import { obtenerFechaHoraEvento } from "../../hooks/getTime";
 import { siguienteValorAlMaximo } from "../../hooks/getNextId";
-
-/* Anexo LocalStorage: esto me permite controlar mi lista de compras momentáneamente */
-let compra = JSON.parse(localStorage.getItem("compra"));
-if (!compra) {
-  let compras = [
-    {
-      time: "18/1/2024 08:12",
-      code: 7002384917,
-      product: "Papas Fritas LAYS 500g.",
-      price: "800",
-      amount: "50",
-      weigth: "-",
-      idUser: "admin",
-      id: 1,
-    },
-    {
-      time: "12/1/2024 12:08",
-      code: 7283944172,
-      product: "COCA-COLA 3Lts",
-      price: "1200",
-      amount: "24",
-      weigth: "-",
-      idUser: "admin",
-      id: 2,
-    },
-    {
-      time: "28/12/2023 18:12",
-      code: 20398299,
-      product: "Chocolate BLOCK 600g.",
-      price: "800",
-      amount: "50",
-      weigth: "-",
-      idUser: "admin",
-      id: 3,
-    },
-    {
-      time: "2/1/2024 18:12",
-      code: 1652336641,
-      product: "Palladini JAMÓN",
-      price: "23000",
-      amount: "2",
-      weigth: "5",
-      idUser: "admin",
-      id: 4,
-    },
-    {
-      time: "21/1/2024 18:12",
-      code: 10,
-      product: "Pan",
-      price: "23000",
-      amount: "-",
-      weigth: "25",
-      idUser: "admin",
-      id: 5,
-    },
-  ];
-  localStorage.setItem("compra", JSON.stringify(compras));
-}
-/* Fin anexo LocalStorage */
+import axios from "axios";
+import { LoginContext } from "../../context/LoginContext";
 
 export const ListaCompras = () => {
   const initialForm = {
@@ -79,10 +22,17 @@ export const ListaCompras = () => {
     setActualizar(!actualizar);
   };
 
-  const [listado, setListado] = useState(compra);
+  const { user } = useContext(LoginContext);
+
+  const url = import.meta.env.VITE_URL_BACKEND;
+
+  const [listado, setListado] = useState(null);
+
   useEffect(() => {
-    setListado(JSON.parse(localStorage.getItem("compra")));
-    setListaFiltrada(JSON.parse(localStorage.getItem("compra")));
+    axios.get(`${url}/compras/`).then(({ data }) => {
+      setListado(data);
+      setListaFiltrada(data);
+    });
   }, [actualizar]);
 
   const { formState, onInputChange, onResetForm, setFormState } =
@@ -93,6 +43,7 @@ export const ListaCompras = () => {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [toDelete, setToDelete] = useState(null);
   const [showAlert, setShowAlert] = useState(false);
+  const [waitAxios, setWaitAxios] = useState(false)
 
   const handleClose = () => {
     setShowModal(false);
@@ -103,6 +54,8 @@ export const ListaCompras = () => {
   };
 
   const campoDeEntradaRef = useRef(null);
+  const campoDeEntradaRef2 = useRef(null);
+
 
   useEffect(() => {
     if (showModal && addMode) {
@@ -111,6 +64,15 @@ export const ListaCompras = () => {
   }, [showModal]);
 
   const [oldPurchase, setOldPurchase] = useState(null);
+
+  const [ListaCodigos, setListaCodigos] = useState(null)
+
+  const getCodigos = () => {
+    axios.get(`${url}/codigos`).then(({ data }) => {
+      console.log(data)
+      setListaCodigos(data)
+    })
+  }
 
   const handleSubmit = (objeto) => {
     setShowAlert(false);
@@ -124,18 +86,15 @@ export const ListaCompras = () => {
     }
 
     let nuevaC = {
-      code: formState.code || "-",
-      price: formState.price,
-      amount: formState.amount || "-",
-      weigth: formState.weigth || "-",
-      /* LocalStorage */
-      product: formState.product,
-      idUser: JSON.parse(localStorage.getItem("usuarioLogueado")).user,
-      time: obtenerFechaHoraEvento(),
-      id: siguienteValorAlMaximo(listado),
-      /* /LocalStorage */
+      codigo: formState.code,
+      precio: formState.price,
+      cantidad: formState.amount || 0,
+      peso: formState.weigth || 0,
+      user: user.id,
+      fechaHora: obtenerFechaHoraEvento(),
     };
     console.log(nuevaC);
+    setWaitAxios(true)
     if (addMode) {
       agregarCompra(nuevaC);
     } else {
@@ -154,16 +113,21 @@ export const ListaCompras = () => {
         actualizador();
       }
     }
-    setShowModal(false);
-    onResetForm();
-    actualizador();
+    setTimeout(function () {
+      setWaitAxios(false);
+      setShowModal(false);
+      onResetForm();
+      actualizador();
+    }, 500);
+
   };
 
   const agregarCompra = (nueva) => {
-    /* Hago para LS */
-    console.log("first");
-    let nuevaLista = [...listado, nueva];
-    localStorage.setItem("compra", JSON.stringify(nuevaLista));
+    axios.post(`${url}/compras/`, nueva).then(({ data }) => {
+      console.log(data.message)
+    }).catch((error) => {
+      console.log(error)
+    });
   };
 
   const handleSubmitEdit = (e) => {
@@ -200,17 +164,33 @@ export const ListaCompras = () => {
   };
 
   const handleSubmitDelete = () => {
-    /* Lo hago con LocalStorage */
-    const index = listado.findIndex((p) => p.id === toDelete.id);
+    setWaitAxios(true)
+    const index = listado.findIndex(
+      (p) => p.id === toDelete.id
+    );
+
     if (index !== -1) {
-      listado.splice(index, 1);
-      localStorage.setItem("compra", JSON.stringify(listado));
-      handleClose();
-      actualizador();
+      axios
+        .delete(`${url}/compras/${toDelete.id}`)
+        .then(({ data }) => {
+          console.log(data);
+          actualizador();
+        })
+        .catch(({ response }) => {
+          console.log(response.data);
+        });
+      setTimeout(function () {
+
+        setWaitAxios(false);
+        setShowModal(false);
+        onResetForm();
+        handleClose();
+        actualizador();
+      }, 500);
     } else {
       console.log("eliminado sin exito");
+      setWaitAxios(false);
     }
-    /* /Lo hago con LocalStorage */
   };
 
   const [listaFiltrada, setListaFiltrada] = useState(listado);
@@ -225,7 +205,7 @@ export const ListaCompras = () => {
       const filterFirstName =
         listado &&
         listado.filter((item) => {
-          const filter = item.product
+          const filter = item.producto
             .toLowerCase()
             .includes(value.toLowerCase());
 
@@ -235,7 +215,7 @@ export const ListaCompras = () => {
       const filterLastName =
         listado &&
         listado.filter((item) => {
-          let codigoString = item.code.toString();
+          let codigoString = item.codigo.toString();
           const filter = codigoString
             .toLowerCase()
             .includes(value.toLowerCase());
@@ -264,6 +244,34 @@ export const ListaCompras = () => {
       setBandera(1);
     }
   }, [listado]);
+
+  useEffect(() => {
+    if (!(formState.code == "")) {
+      productoYCodigo()
+    }
+  }, [formState.code])
+
+  const tabPulsed = (event) => {
+    if (event.key === "Tab") {
+      event.preventDefault();
+      productoYCodigo()
+      campoDeEntradaRef2.current.focus();
+    }
+  }
+
+  const productoYCodigo = () => {
+    let a = ListaCodigos.find((c) => c.code == formState.code)
+
+    if (a != undefined) {
+      setFormState({ ...formState, product: a.description })
+      /* formState.product = a.description */
+    } else {
+      setFormState({ ...formState, product: "Producto no encontrado" })
+      /* formState.product = "Producto no encontrado" */
+    }
+
+  }
+
   return (
     <>
       <div className="mt-4"></div>
@@ -275,6 +283,7 @@ export const ListaCompras = () => {
         onClick={() => {
           setShowModal(true);
           setAddMode(true);
+          getCodigos()
         }}
       >
         <i className="bi bi-plus-circle"></i> Agregar Compra
@@ -307,23 +316,24 @@ export const ListaCompras = () => {
         <tbody>
           {listaFiltrada?.map((c, index) => (
             <tr key={index}>
-              <th scope="row">{c.id} </th>
-              <td>{c.time}</td>
-              <td>{c.code}</td>
-              <td>{c.product} </td>
-              <td>{c.amount} </td>
-              <td>{c.weigth} </td>
-              <td>${c.price} </td>
-              <td>{c.idUser} </td>
+              <th scope="row">{index + 1} </th>
+              <td>{c.fechaHora}</td>
+              <td>{c.codigo}</td>
+              <td>{c.producto} </td>
+              <td>{c.cantidad} </td>
+              <td>{c.peso} </td>
+              <td>${c.precio} </td>
+              <td>{c.user} </td>
               <td>
                 <button
                   type="button"
                   className="btn btn-secondary me-2"
                   onClick={() => handleSubmitEdit(c)}
+                  disabled
                 >
                   <i className="bi bi-pencil"></i>
                 </button>
-                <button type="button" className="btn btn-secondary me-2">
+                <button type="button" className="btn btn-secondary me-2" disabled>
                   <i className="bi bi-eye"></i>
                 </button>
                 <button
@@ -355,6 +365,7 @@ export const ListaCompras = () => {
                     value={formState.code}
                     onChange={onInputChange}
                     ref={campoDeEntradaRef}
+                    onKeyDown={tabPulsed}
                   />
                 </Form.Group>
               </div>
@@ -363,11 +374,12 @@ export const ListaCompras = () => {
                   <Form.Label>Producto</Form.Label>
                   <Form.Control
                     as="textarea"
-                    rows={3}
+                    rows={1}
                     type="text"
                     name="product"
                     value={formState.product}
                     onChange={onInputChange}
+                    disabled
                   />
                 </Form.Group>
               </div>
@@ -379,6 +391,7 @@ export const ListaCompras = () => {
                     name="amount"
                     value={formState.amount}
                     onChange={onInputChange}
+                    ref={campoDeEntradaRef2}
                   />
                 </Form.Group>
               </div>
@@ -428,7 +441,7 @@ export const ListaCompras = () => {
           <Button
             variant="secondary"
             onClick={handleClose}
-            /* disabled={waitAxios} */
+            disabled={waitAxios}
           >
             Cerrar
           </Button>
@@ -437,7 +450,7 @@ export const ListaCompras = () => {
             onClick={() => {
               handleSubmit(formState);
             }}
-            /* disabled={waitAxios} */
+            disabled={waitAxios}
           >
             {addMode ? "Agregar" : "Guardar Cambios"}
           </Button>
@@ -455,7 +468,7 @@ export const ListaCompras = () => {
           <Button
             variant="secondary"
             onClick={handleClose}
-            /* disabled={waitAxios} */
+            disabled={waitAxios}
           >
             Cerrar
           </Button>
@@ -464,7 +477,7 @@ export const ListaCompras = () => {
             onClick={() => {
               handleSubmitDelete(toDelete);
             }}
-            /* disabled={waitAxios} */
+            disabled={waitAxios}
           >
             <b>Eliminar</b>
           </Button>

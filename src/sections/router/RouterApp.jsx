@@ -17,7 +17,7 @@ export const RouterApp = () => {
   const [user, setUser] = useState(null);
   const [token, setToken] = useState(null);
   const state = { isLoggedIn, setIsLoggedIn, user, setUser, token, setToken };
-  console.log(user);
+  
   return (
     <LoginContext.Provider value={state}>
       <Navbar />
