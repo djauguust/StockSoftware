@@ -1,36 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Button, Form, Modal } from "react-bootstrap";
 import { useForm } from "../../hooks/useForm";
-
-/* Anexo LocalStorage: esto me permite controlar mi lista de ventas momentáneamente */
-let venta = JSON.parse(localStorage.getItem("venta"));
-if (!venta) {
-  let ventas = [
-    {
-      time: "18/1/2024 08:12",
-      product: "Papas Fritas LAYS 500g. x2, Palladini JAMÓN x300g",
-      price: "2350",
-      idUser: "admin",
-      id: 1,
-    },
-    {
-      time: "18/1/2024 08:12",
-      product: "COCA-COLA 3Lts x3",
-      price: "3350",
-      idUser: "admin",
-      id: 2,
-    },
-    {
-      time: "18/1/2024 08:12",
-      product: "Chocolate BLOCK 600g. x1, Papas Fritas LAYS 500g. x1",
-      price: "5000",
-      idUser: "admin",
-      id: 3,
-    },
-  ];
-  localStorage.setItem("venta", JSON.stringify(ventas));
-}
-/* Fin anexo LocalStorage */
+import axios from "axios";
 
 export const ListaVentas = () => {
   const initialForm = {
@@ -47,12 +18,8 @@ export const ListaVentas = () => {
     setActualizar(!actualizar);
   };
 
-  const [listado, setListado] = useState(venta);
-  const [listaFiltrada, setListaFiltrada] = useState(venta);
-  useEffect(() => {
-    setListado(JSON.parse(localStorage.getItem("venta")));
-    setListaFiltrada(JSON.parse(localStorage.getItem("venta")));
-  }, [actualizar]);
+  const [listado, setListado] = useState(null);
+  const [listaFiltrada, setListaFiltrada] = useState(null);
 
   const [showModal, setShowModal] = useState(false);
   const [addMode, setAddMode] = useState(true);
@@ -86,6 +53,16 @@ export const ListaVentas = () => {
     }
     /* /Lo hago con LocalStorage */
   };
+
+  const url = import.meta.env.VITE_URL_BACKEND;
+
+  useEffect(() => {
+    axios.get(`${url}/ventas/`).then(({ data }) => {
+      console.log(data)
+      setListado(data);
+      setListaFiltrada(data);
+    });
+  }, [actualizar]);
   return (
     <>
       <h1>Lista de Ventas</h1>
@@ -118,11 +95,11 @@ export const ListaVentas = () => {
         <tbody>
           {listaFiltrada?.map((c, index) => (
             <tr key={index}>
-              <th scope="row">{c.id} </th>
-              <td>{c.time}</td>
-              <td>{c.product} </td>
-              <td>${c.price} </td>
-              <td>{c.idUser} </td>
+              <th scope="row">{index + 1} </th>
+              <td>{c.fechaHora}</td>
+              <td>TO DO </td>
+              <td>${c.precioTotal} </td>
+              <td>{c.user.nombre} </td>
               <td>
                 <button
                   type="button"
@@ -144,61 +121,6 @@ export const ListaVentas = () => {
               </td>
             </tr>
           ))}
-          {/* <tr>
-            <th scope="row">1</th>
-            <td>18/1/2024 08:12</td>
-            <td className="text-break">
-              Papas Fritas LAYS 500g. x2, Palladini JAMÓN x300g
-            </td>
-            <td>$2350</td>
-            <td>admin</td>
-            <td>
-              <button type="button" className="btn btn-secondary me-2">
-                <i className="bi bi-pencil"></i>
-              </button>
-              <button type="button" className="btn btn-secondary me-2">
-                <i className="bi bi-eye"></i>
-              </button>
-              <button type="button" className="btn btn-danger">
-                <i className="bi bi-trash"></i>
-              </button>
-            </td>
-          </tr>
-          <tr>
-            <th scope="row">2</th>
-            <td>12/1/2024 12:08</td>
-            <td>COCA-COLA 3Lts x3</td>
-            <td>$3350</td>
-            <td>Admin</td>
-            <td>
-              <button type="button" className="btn btn-secondary me-2">
-                <i className="bi bi-pencil"></i>
-              </button>
-              <button type="button" className="btn btn-secondary me-2">
-                <i className="bi bi-eye"></i>
-              </button>
-              <button type="button" className="btn btn-danger">
-                <i className="bi bi-trash"></i>
-              </button>
-            </td>
-          </tr>
-          <tr>
-            <th scope="row">3</th>
-            <td>28/12/2023 18:12</td>
-            <td>Chocolate BLOCK 600g. x1, Papas Fritas LAYS 500g. x1</td>
-            <td>$5000</td>
-            <td>
-              <button type="button" className="btn btn-secondary me-2">
-                <i className="bi bi-pencil"></i>
-              </button>
-              <button type="button" className="btn btn-secondary me-2">
-                <i className="bi bi-eye"></i>
-              </button>
-              <button type="button" className="btn btn-danger">
-                <i className="bi bi-trash"></i>
-              </button>
-            </td>
-          </tr> */}
         </tbody>
       </table>
       <Modal show={showDeleteModal} onHide={handleClose}>
@@ -212,7 +134,7 @@ export const ListaVentas = () => {
           <Button
             variant="secondary"
             onClick={handleClose}
-            /* disabled={waitAxios} */
+          /* disabled={waitAxios} */
           >
             Cerrar
           </Button>
@@ -221,7 +143,7 @@ export const ListaVentas = () => {
             onClick={() => {
               handleSubmitDelete(toDelete);
             }}
-            /* disabled={waitAxios} */
+          /* disabled={waitAxios} */
           >
             <b>Eliminar</b>
           </Button>

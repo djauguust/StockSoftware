@@ -55,21 +55,6 @@ export const LoginPage = () => {
         setUser(null);
         setToken(null);
       });
-    console.log(user);
-    /* let logueo = usuario.find(
-      (p) => p.email == datos.email && p.contrasenia == datos.contrasenia
-    );
-    if (!logueo) {
-      setShowAlert(true);
-      console.log("error");
-    } else {
-      console.log("logueo");
-      localStorage.setItem("usuarioLogueado", JSON.stringify(logueo));
-      navigate("/", {
-        replace: true,
-      });
-    } */
-    /* Arriba iría la consulta al backend */
   };
 
   useEffect(() => {
