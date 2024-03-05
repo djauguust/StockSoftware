@@ -30,6 +30,7 @@ export const ListaVentas = () => {
   const [waitAxios, setWaitAxios] = useState(false)
 
   const handleClose = () => {
+    setWaitAxios(false)
     setShowModal(false);
     setShowDeleteModal(false);
     setShowViewModal(false);
@@ -39,6 +40,7 @@ export const ListaVentas = () => {
   };
 
   const handleDelete = (purchase) => {
+    setShowViewModal(false)
     setToDelete(purchase);
     setShowDeleteModal(true);
   };
@@ -181,36 +183,54 @@ export const ListaVentas = () => {
       <Modal show={showViewModal} onHide={handleClose}>
         <Modal.Header closeButton>
           <Modal.Title>Detalle de Venta</Modal.Title>
-          <Modal.Body>
-            <p>Fecha y Hora: <b>{view?.fechaHora}</b></p>
-            <p>
-              Precio Total: <b>$ {view?.precioTotal}</b>
-            </p>
-            <p>Venta realizada por: <b>{view?.user.apellido}, {view?.user.nombre}</b></p>
-            <table className="table table-striped">
-              <thead>
-                <tr>
-                  <th scope="col">#</th>
-                  <th scope="col">Productos</th>
-                  <th scope="col">Cantidad</th>
-                  <th scope="col">Peso</th>
-                  <th scope="col">Precio</th>
-                </tr>
-              </thead>
-              <tbody>
-                {view?.productos.map((c, index) => (
-                  <tr key={index}>
-                    <th scope="row">{index + 1} </th>
-                    <td>{c.producto}</td>
-                    <td>{c.cantidad}</td>
-                    <td>{c.peso} </td>
-                    <td>${c.precio} </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </Modal.Body>
         </Modal.Header>
+        <Modal.Body>
+          <p>Fecha y Hora: <b>{view?.fechaHora}</b></p>
+          <p>
+            Precio Total: <b>$ {view?.precioTotal}</b>
+          </p>
+          <p>Venta realizada por: <b>{view?.user.apellido}, {view?.user.nombre}</b></p>
+          <table className="table table-striped">
+            <thead>
+              <tr>
+                <th scope="col">#</th>
+                <th scope="col">Producto</th>
+                <th scope="col">Cantidad</th>
+                <th scope="col">Peso</th>
+                <th scope="col">Precio</th>
+              </tr>
+            </thead>
+            <tbody>
+              {view?.productos.map((c, index) => (
+                <tr key={index}>
+                  <th scope="row">{index + 1} </th>
+                  <td>{c.producto}</td>
+                  <td>{c.cantidad}</td>
+                  <td>{c.peso} </td>
+                  <td>${c.precio} </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button
+            variant="secondary"
+            onClick={handleClose}
+            disabled={waitAxios}
+          >
+            Cerrar
+          </Button>
+          <Button
+            variant="danger"
+            onClick={() => {
+              handleDelete(view);
+            }}
+            disabled={waitAxios}
+          >
+            <b>Eliminar</b>
+          </Button>
+        </Modal.Footer>
       </Modal>
     </>
   );
