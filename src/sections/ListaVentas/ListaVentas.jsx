@@ -27,10 +27,12 @@ export const ListaVentas = () => {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [toDelete, setToDelete] = useState(null);
   const [showAlert, setShowAlert] = useState(false);
+  const [waitAxios, setWaitAxios] = useState(false)
 
   const handleClose = () => {
     setShowModal(false);
     setShowDeleteModal(false);
+    setShowViewModal(false);
     setToDelete(null);
     setShowAlert(false);
     onResetForm();
@@ -41,18 +43,35 @@ export const ListaVentas = () => {
     setShowDeleteModal(true);
   };
 
-  const handleSubmitDelete = () => {
-    /* Lo hago con LocalStorage */
-    const index = listado.findIndex((p) => p.id === toDelete.id);
+  const handleSubmitDelete = (toDelete) => {
+    setWaitAxios(true)
+    const index = listado.findIndex(
+      (p) => p.id === toDelete.id
+    );
+    console.log(index)
     if (index !== -1) {
-      listado.splice(index, 1);
-      localStorage.setItem("venta", JSON.stringify(listado));
-      handleClose();
-      actualizador();
-    } else {
-      console.log("eliminado sin exito");
+      axios
+        .delete(`${url}/ventas/${toDelete.id}`)
+        .then(({ data }) => {
+          console.log(data);
+          actualizador();
+        })
+        .catch(({ response }) => {
+          console.log(response.data);
+        });
+
+      setTimeout(function () {
+        setWaitAxios(false);
+        setShowModal(false);
+        onResetForm();
+        handleClose();
+        actualizador();
+      }, 500);
     }
-    /* /Lo hago con LocalStorage */
+    else {
+      console.log("eliminado sin exito");
+      setWaitAxios(false);
+    }
   };
 
   const url = import.meta.env.VITE_URL_BACKEND;
@@ -64,7 +83,10 @@ export const ListaVentas = () => {
       setListaFiltrada(data);
     });
   }, [actualizar]);
-  
+
+  const [showViewModal, setShowViewModal] = useState(false)
+  const [view, setView] = useState(null)
+
   return (
     <>
       <h1>Lista de Ventas</h1>
@@ -110,7 +132,12 @@ export const ListaVentas = () => {
                 >
                   <i className="bi bi-pencil"></i>
                 </button>
-                <button type="button" className="btn btn-secondary me-2">
+                <button type="button" className="btn btn-secondary me-2"
+                  onClick={() => {
+                    setShowViewModal(true)
+                    setView(c)
+                  }}
+                >
                   <i className="bi bi-eye"></i>
                 </button>
                 <button
@@ -130,13 +157,13 @@ export const ListaVentas = () => {
           <Modal.Title>Confirmar eliminación de venta</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          ¿Realmente desea eliminar la venta <b>{toDelete?.product}</b>?
+          ¿Realmente desea eliminar la venta <b>{getStringOfProducts(toDelete?.product)}</b>?
         </Modal.Body>
         <Modal.Footer>
           <Button
             variant="secondary"
             onClick={handleClose}
-          /* disabled={waitAxios} */
+            disabled={waitAxios}
           >
             Cerrar
           </Button>
@@ -145,11 +172,45 @@ export const ListaVentas = () => {
             onClick={() => {
               handleSubmitDelete(toDelete);
             }}
-          /* disabled={waitAxios} */
+            disabled={waitAxios}
           >
             <b>Eliminar</b>
           </Button>
         </Modal.Footer>
+      </Modal>
+      <Modal show={showViewModal} onHide={handleClose}>
+        <Modal.Header closeButton>
+          <Modal.Title>Detalle de Venta</Modal.Title>
+          <Modal.Body>
+            <p>Fecha y Hora: <b>{view?.fechaHora}</b></p>
+            <p>
+              Precio Total: <b>$ {view?.precioTotal}</b>
+            </p>
+            <p>Venta realizada por: <b>{view?.user.apellido}, {view?.user.nombre}</b></p>
+            <table className="table table-striped">
+              <thead>
+                <tr>
+                  <th scope="col">#</th>
+                  <th scope="col">Productos</th>
+                  <th scope="col">Cantidad</th>
+                  <th scope="col">Peso</th>
+                  <th scope="col">Precio</th>
+                </tr>
+              </thead>
+              <tbody>
+                {view?.productos.map((c, index) => (
+                  <tr key={index}>
+                    <th scope="row">{index + 1} </th>
+                    <td>{c.producto}</td>
+                    <td>{c.cantidad}</td>
+                    <td>{c.peso} </td>
+                    <td>${c.precio} </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </Modal.Body>
+        </Modal.Header>
       </Modal>
     </>
   );
