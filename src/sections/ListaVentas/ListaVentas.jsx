@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Button, Form, Modal } from "react-bootstrap";
 import { useForm } from "../../hooks/useForm";
 import axios from "axios";
+import { getStringOfProducts } from "./getStringOfProducts";
 
 export const ListaVentas = () => {
   const initialForm = {
@@ -63,6 +64,7 @@ export const ListaVentas = () => {
       setListaFiltrada(data);
     });
   }, [actualizar]);
+  
   return (
     <>
       <h1>Lista de Ventas</h1>
@@ -97,7 +99,7 @@ export const ListaVentas = () => {
             <tr key={index}>
               <th scope="row">{index + 1} </th>
               <td>{c.fechaHora}</td>
-              <td>TO DO </td>
+              <td>{getStringOfProducts(c.productos)}</td>
               <td>${c.precioTotal} </td>
               <td>{c.user.nombre} </td>
               <td>
