@@ -14,7 +14,6 @@ export const ListaCodigos = () => {
   const [actualizar, setActualizar] = useState(false);
   const actualizador = () => {
     setActualizar(!actualizar);
-    console.log("actualice");
   };
 
   const url = import.meta.env.VITE_URL_BACKEND;

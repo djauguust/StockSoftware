@@ -50,6 +50,7 @@ export const LoginPage = () => {
         });
       })
       .catch(({ response }) => {
+        setShowAlert(true)
         console.log(response);
         setIsLoggedIn(false);
         setUser(null);

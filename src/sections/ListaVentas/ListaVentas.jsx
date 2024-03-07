@@ -80,7 +80,6 @@ export const ListaVentas = () => {
 
   useEffect(() => {
     axios.get(`${url}/ventas/`).then(({ data }) => {
-      console.log(data)
       setListado(data);
       setListaFiltrada(data);
     });

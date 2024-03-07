@@ -3,7 +3,7 @@ export const getStringOfProducts = (array) => {
     let retorno = ``;
     let size = array?.length
     array?.map((e, index) => {
-        retorno = retorno + `${e.producto} `
+        retorno = retorno + `"${e.producto}" `
         if (e.peso != 0) {
             retorno = retorno + `x${e.peso * 1000}g`
         }
