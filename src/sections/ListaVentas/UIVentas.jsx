@@ -1,5 +1,5 @@
 import React, { Fragment, useEffect, useState } from "react";
-import { Col, Form, Row } from "react-bootstrap";
+import { Button, Col, Form, Row } from "react-bootstrap";
 import { useForm } from "../../hooks/useForm";
 
 export const UIVentas = () => {
@@ -34,14 +34,15 @@ export const UIVentas = () => {
     return `${dia}/${mes + 1}/${anio}`;
   };
   const initialForm = {
-    searchText: "",
-    code: "",
-    description: "",
+    textoBusqueda: "",
+    codigo: "",
+    cantidad: "",
+    peso: ""
   };
   const { formState, onInputChange, onResetForm, setFormState } =
     useForm(initialForm);
 
-    const [lista, setLista] = useState(null)
+  const [lista, setLista] = useState(null)
   return (
     <Fragment>
       <Row className="my-3 mx-5">
@@ -66,9 +67,9 @@ export const UIVentas = () => {
               <Form.Control
                 type="number"
                 name="code"
-                value={formState.code}
+                value={formState.cantidad}
                 onChange={onInputChange}
-                /* ref={campoDeEntradaRef} */
+              /* ref={campoDeEntradaRef} */
               />
             </Form.Group>
           </div>
@@ -78,9 +79,9 @@ export const UIVentas = () => {
               <Form.Control
                 type="number"
                 name="code"
-                value={formState.code}
+                value={formState.peso}
                 onChange={onInputChange}
-                /* ref={campoDeEntradaRef} */
+              /* ref={campoDeEntradaRef} */
               />
             </Form.Group>
           </div>
@@ -90,9 +91,9 @@ export const UIVentas = () => {
               <Form.Control
                 type="number"
                 name="code"
-                value={formState.code}
+                value={formState.codigo}
                 onChange={onInputChange}
-                /* ref={campoDeEntradaRef} */
+              /* ref={campoDeEntradaRef} */
               />
             </Form.Group>
           </div>
@@ -101,6 +102,49 @@ export const UIVentas = () => {
       <Row className="my-3 mx-5">
         <h1>"Nombre producto"</h1>
       </Row>
+      <hr />
+      <table className="table table-striped mt-3 px-4">
+        <thead className="px-2">
+          <tr>
+            <th scope="col">#</th>
+            <th scope="col">PRODUCTO</th>
+            <th scope="col">CANTIDAD</th>
+            <th scope="col">PESO</th>
+            <th scope="col">PRECIO</th>
+            <th scope="col">ELIMINAR</th>
+          </tr>
+        </thead>
+        <tbody>
+        </tbody>
+      </table>
+      <nav className="navbar navbar-dark bg-dark fixed-bottom text-white">
+        <div className="container">
+          <div className="col-3">
+            <Button className="ms-4" variant="success" size="lg"><b>PAGAR</b></Button>
+          </div>
+          <div className="col-3">
+            <Button className="ms-4" variant="danger" size="lg"><b>LIMPIAR</b></Button>
+          </div>
+          <div className="col-2">
+
+          </div>
+          <div className="col-4">
+            <h1 className="me-0">TOTAL: $1.223</h1>
+          </div>
+
+        </div>
+      </nav>
+
+  {/*     <Row className="p-3 bg-dark position-fixed bottom-0">
+      </Row>
+      <Row className="p-3 bg-dark position-fixed bottom-0 end-0">
+      </Row> */}
+
+      {/* <div className="bg-dark text-white">
+        <div className="p-3 bg-dark position-fixed bottom-0">
+
+        </div>
+      </div> */}
     </Fragment>
   );
 };
