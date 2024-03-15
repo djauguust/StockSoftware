@@ -1,6 +1,7 @@
-import React, { Fragment, useEffect, useState } from "react";
+import React, { Fragment, useEffect, useRef, useState } from "react";
 import { Button, Col, Form, Row } from "react-bootstrap";
 import { useForm } from "../../hooks/useForm";
+import axios from "axios";
 
 export const UIVentas = () => {
   const [hora, setHora] = useState(new Date());
@@ -23,8 +24,9 @@ export const UIVentas = () => {
     const horas = date.getHours();
     const minutos = date.getMinutes();
     const segundos = date.getSeconds();
-    return `${horas < 10 ? `0${horas}` : horas}:${minutos < 10 ? `0${minutos}` : minutos
-      }:${segundos < 10 ? `0${segundos}` : segundos}`;
+    return `${horas < 10 ? `0${horas}` : horas}:${
+      minutos < 10 ? `0${minutos}` : minutos
+    }:${segundos < 10 ? `0${segundos}` : segundos}`;
   };
   const formatearFecha = (date) => {
     const dia = date.getDate();
@@ -37,12 +39,108 @@ export const UIVentas = () => {
     textoBusqueda: "",
     codigo: "",
     cantidad: "",
-    peso: ""
+    peso: "",
+    producto: "",
+    precio: "",
   };
   const { formState, onInputChange, onResetForm, setFormState } =
     useForm(initialForm);
 
-  const [lista, setLista] = useState(null)
+  const [lista, setLista] = useState([]);
+
+  let array = [
+    1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21,
+    22, 23, 24, 25, 26, 27, 28, 29, 30,
+  ];
+
+  const refCantidad = useRef(null);
+  const refPeso = useRef(null);
+  const refCodigo = useRef(null);
+
+  useEffect(() => {
+    refCantidad.current.focus();
+  }, []);
+
+  const onCantidadPulsed = (event) => {
+    if (event.key === "Enter") {
+      event.preventDefault();
+      refPeso.current.focus();
+    }
+    if (event.key === "Tab") {
+      event.preventDefault();
+      /* Codigo = Cantidad y Cantidad = 1 */
+      setFormState({
+        ...formState,
+        codigo: formState.cantidad,
+        cantidad: 1,
+        peso: "",
+      });
+      /* Carga al carrito y onResetForm */
+    }
+  };
+
+  const onPesoPulsed = (event) => {
+    if (event.key === "Enter") {
+      event.preventDefault();
+      refCodigo.current.focus();
+    }
+
+    if (event.key === "Tab") {
+      event.preventDefault();
+      /* Codigo = Peso y Peso = 100 */
+      setFormState({
+        ...formState,
+        codigo: formState.peso,
+        peso: 100,
+        cantidad: "",
+      });
+      /* Carga al carrito y onResetForm */
+    }
+  };
+
+  const onCodigoPulsed = (event) => {
+    if (event.key === "Enter" || event.key === "Tab") {
+      event.preventDefault();
+      if (
+        formState.codigo == "" &&
+        formState.peso == "" &&
+        formState.cantidad == ""
+      ) {
+        /* Cierra la caja */
+        console.log("cierro caja");
+      } else {
+        if (formState.cantidad !== "" && formState.codigo !== "") {
+          /* Carga en carrito y onResetForm */
+        } else {
+          if (formState.codigo == "") {
+            /* onResetForm */
+            console.log("Sólo codigo vacío");
+          } else {
+            if (formState.cantidad !== "" && formState.peso !== "") {
+              console.log("cantidad y peso con info");
+            } else {
+              /* Carga en carrito y onResetForm */
+            }
+          }
+        }
+      }
+    }
+  };
+
+  const agregarACarrito = (producto) => {
+    setLista([
+      ...lista,
+      {
+        producto: producto.producto,
+        cantidad: producto.cantidad,
+        peso: producto.peso,
+        precio: producto.precio,
+      },
+    ]);
+  };
+
+  /* Quedo aquí porque tengo que empezar con STOCK */
+
   return (
     <Fragment>
       <Row className="my-3 mx-5">
@@ -63,37 +161,46 @@ export const UIVentas = () => {
         <div className="row px-5 container-fluid">
           <div className="col-4">
             <Form.Group className="mb-3" controlId="formCodBarra">
-              <Form.Label><h5>Cantidad</h5></Form.Label>
+              <Form.Label>
+                <h5>Cantidad</h5>
+              </Form.Label>
               <Form.Control
                 type="number"
-                name="code"
+                name="cantidad"
                 value={formState.cantidad}
                 onChange={onInputChange}
-              /* ref={campoDeEntradaRef} */
+                ref={refCantidad}
+                onKeyDown={onCantidadPulsed}
               />
             </Form.Group>
           </div>
           <div className="col-4">
             <Form.Group className="mb-3" controlId="formCodBarra">
-              <Form.Label><h5>Peso</h5></Form.Label>
+              <Form.Label>
+                <h5>Peso (en gramos)</h5>
+              </Form.Label>
               <Form.Control
                 type="number"
-                name="code"
+                name="peso"
                 value={formState.peso}
                 onChange={onInputChange}
-              /* ref={campoDeEntradaRef} */
+                ref={refPeso}
+                onKeyDown={onPesoPulsed}
               />
             </Form.Group>
           </div>
           <div className="col-4">
             <Form.Group className="mb-3" controlId="formCodBarra">
-              <Form.Label><h5>Código de Barras</h5></Form.Label>
+              <Form.Label>
+                <h5>Código de Barras</h5>
+              </Form.Label>
               <Form.Control
                 type="number"
-                name="code"
+                name="codigo"
                 value={formState.codigo}
                 onChange={onInputChange}
-              /* ref={campoDeEntradaRef} */
+                ref={refCodigo}
+                onKeyDown={onCodigoPulsed}
               />
             </Form.Group>
           </div>
@@ -115,36 +222,40 @@ export const UIVentas = () => {
           </tr>
         </thead>
         <tbody>
+          {array.map((e) => {
+            if (e < 30)
+              return (
+                <tr key={e + 1}>
+                  <th scope="row"> </th>
+                  <td> </td>
+                  <td> </td>
+                  <td> </td>
+                  <td> </td>
+                  <td> </td>
+                </tr>
+              );
+          })}
         </tbody>
       </table>
+
       <nav className="navbar navbar-dark bg-dark fixed-bottom text-white">
         <div className="container">
           <div className="col-3">
-            <Button className="ms-4" variant="success" size="lg"><b>PAGAR</b></Button>
+            <Button className="ms-4" variant="success" size="lg">
+              <b>PAGAR</b>
+            </Button>
           </div>
           <div className="col-3">
-            <Button className="ms-4" variant="danger" size="lg"><b>LIMPIAR</b></Button>
+            <Button className="ms-4" variant="danger" size="lg">
+              <b>LIMPIAR</b>
+            </Button>
           </div>
-          <div className="col-2">
-
-          </div>
+          <div className="col-2"></div>
           <div className="col-4">
             <h1 className="me-0">TOTAL: $1.223</h1>
           </div>
-
         </div>
       </nav>
-
-  {/*     <Row className="p-3 bg-dark position-fixed bottom-0">
-      </Row>
-      <Row className="p-3 bg-dark position-fixed bottom-0 end-0">
-      </Row> */}
-
-      {/* <div className="bg-dark text-white">
-        <div className="p-3 bg-dark position-fixed bottom-0">
-
-        </div>
-      </div> */}
     </Fragment>
   );
 };

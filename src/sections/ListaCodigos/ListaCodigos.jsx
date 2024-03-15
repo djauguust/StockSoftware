@@ -234,6 +234,12 @@ export const ListaCodigos = () => {
     }
   };
 
+  const enterPulsed = (event) => {
+    if (event.key === "Enter") {
+      event.preventDefault();
+    }
+  };
+  
   return (
     <>
       <div className="mt-4"></div>
@@ -258,6 +264,7 @@ export const ListaCodigos = () => {
           autoComplete="off"
           value={formState.searchText}
           onChange={onInputChange}
+          onKeyDown={enterPulsed}
         />
       </Form>
       <table className="table table-striped mt-3">

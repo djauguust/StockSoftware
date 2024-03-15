@@ -9,6 +9,12 @@ export const ListaStock = () => {
     
     const { formState, onInputChange, onResetForm } = useForm(initialForm);
 
+    const enterPulsed = (event) => {
+        if (event.key === "Enter") {
+          event.preventDefault();
+        }
+      };
+
     return (
         <>
             <h1>
@@ -27,6 +33,7 @@ export const ListaStock = () => {
                     autoComplete="off"
                     value={formState.searchText}
                     onChange={onInputChange}
+                    onKeyDown={enterPulsed}
                 />
             </Form>
             <table className="table table-striped">
@@ -34,7 +41,6 @@ export const ListaStock = () => {
                     <tr>
                         <th scope="col">#</th>
                         <th scope="col">Código de Barras</th>
-                        <th scope="col">Código simple</th>
                         <th scope="col">Descripción</th>
                         <th scope="col">Cantidad</th>
                         <th scope="col">Cantidad Peso</th>
@@ -46,7 +52,6 @@ export const ListaStock = () => {
                     <tr>
                         <th scope="row">1</th>
                         <td>7002384917</td>
-                        <td>-</td>
                         <td>Papas Fritas LAYS 500g.</td>
                         <td>48</td>
                         <td>-</td>
@@ -59,7 +64,6 @@ export const ListaStock = () => {
                     <tr>
                         <th scope="row">2</th>
                         <td>7283944172</td>
-                        <td>-</td>
                         <td>COCA-COLA 3Lts</td>
                         <td>20</td>
                         <td>-</td>
@@ -72,7 +76,6 @@ export const ListaStock = () => {
                     <tr>
                         <th scope="row">3</th>
                         <td>0020398299</td>
-                        <td>-</td>
                         <td>Chocolate BLOCK 600g.</td>
                         <td>2</td>
                         <td>-</td>

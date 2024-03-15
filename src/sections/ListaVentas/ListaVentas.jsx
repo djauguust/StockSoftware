@@ -27,10 +27,10 @@ export const ListaVentas = () => {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [toDelete, setToDelete] = useState(null);
   const [showAlert, setShowAlert] = useState(false);
-  const [waitAxios, setWaitAxios] = useState(false)
+  const [waitAxios, setWaitAxios] = useState(false);
 
   const handleClose = () => {
-    setWaitAxios(false)
+    setWaitAxios(false);
     setShowModal(false);
     setShowDeleteModal(false);
     setShowViewModal(false);
@@ -40,17 +40,15 @@ export const ListaVentas = () => {
   };
 
   const handleDelete = (purchase) => {
-    setShowViewModal(false)
+    setShowViewModal(false);
     setToDelete(purchase);
     setShowDeleteModal(true);
   };
 
   const handleSubmitDelete = (toDelete) => {
-    setWaitAxios(true)
-    const index = listado.findIndex(
-      (p) => p.id === toDelete.id
-    );
-    console.log(index)
+    setWaitAxios(true);
+    const index = listado.findIndex((p) => p.id === toDelete.id);
+    console.log(index);
     if (index !== -1) {
       axios
         .delete(`${url}/ventas/${toDelete.id}`)
@@ -69,8 +67,7 @@ export const ListaVentas = () => {
         handleClose();
         actualizador();
       }, 500);
-    }
-    else {
+    } else {
       console.log("eliminado sin exito");
       setWaitAxios(false);
     }
@@ -85,9 +82,14 @@ export const ListaVentas = () => {
     });
   }, [actualizar]);
 
-  const [showViewModal, setShowViewModal] = useState(false)
-  const [view, setView] = useState(null)
+  const [showViewModal, setShowViewModal] = useState(false);
+  const [view, setView] = useState(null);
 
+  const enterPulsed = (event) => {
+    if (event.key === "Enter") {
+      event.preventDefault();
+    }
+  };
   return (
     <>
       <h1>Lista de Ventas</h1>
@@ -104,6 +106,7 @@ export const ListaVentas = () => {
           autoComplete="off"
           value={formState.searchText}
           onChange={onInputChange}
+          onKeyDown={enterPulsed}
         />
       </Form>
       <table className="table table-striped">
@@ -133,10 +136,12 @@ export const ListaVentas = () => {
                 >
                   <i className="bi bi-pencil"></i>
                 </button>
-                <button type="button" className="btn btn-secondary me-2"
+                <button
+                  type="button"
+                  className="btn btn-secondary me-2"
                   onClick={() => {
-                    setShowViewModal(true)
-                    setView(c)
+                    setShowViewModal(true);
+                    setView(c);
                   }}
                 >
                   <i className="bi bi-eye"></i>
@@ -158,7 +163,8 @@ export const ListaVentas = () => {
           <Modal.Title>Confirmar eliminación de venta</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          ¿Realmente desea eliminar la venta <b>{getStringOfProducts(toDelete?.product)}</b>?
+          ¿Realmente desea eliminar la venta{" "}
+          <b>{getStringOfProducts(toDelete?.product)}</b>?
         </Modal.Body>
         <Modal.Footer>
           <Button
@@ -184,11 +190,18 @@ export const ListaVentas = () => {
           <Modal.Title>Detalle de Venta</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <p>Fecha y Hora: <b>{view?.fechaHora}</b></p>
+          <p>
+            Fecha y Hora: <b>{view?.fechaHora}</b>
+          </p>
           <p>
             Precio Total: <b>$ {view?.precioTotal}</b>
           </p>
-          <p>Venta realizada por: <b>{view?.user.apellido}, {view?.user.nombre}</b></p>
+          <p>
+            Venta realizada por:{" "}
+            <b>
+              {view?.user.apellido}, {view?.user.nombre}
+            </b>
+          </p>
           <table className="table table-striped">
             <thead>
               <tr>
