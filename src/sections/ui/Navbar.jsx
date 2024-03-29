@@ -35,7 +35,7 @@ export const Navbar = () => {
   };
 
   const toAdmin = () => {
-    navigate("/login", {
+    navigate("/admin", {
       replace: true,
     });
   };

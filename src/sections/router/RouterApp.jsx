@@ -10,6 +10,7 @@ import { UIVentas } from "../ListaVentas/UIVentas";
 import { Navbar } from "../ui/Navbar";
 import { LoginContext } from "../../context/LoginContext";
 import { Error404 } from "../ui/Error404";
+import { Admin } from "../ui/Admin";
 
 export const RouterApp = () => {
   // LoginContext
@@ -30,6 +31,8 @@ export const RouterApp = () => {
             <Route path="/compras" element={<ListaCompras />} />
             <Route path="/stock" element={<ListaStock />} />
             <Route path="/codigos" element={<ListaCodigos />} />
+
+            <Route path="/admin" element={<Admin />} />
           </>
         ) : (
           <Route path="/login" element={<LoginPage />} />
