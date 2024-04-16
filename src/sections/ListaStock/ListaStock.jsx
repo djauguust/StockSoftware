@@ -1,19 +1,33 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import { Form } from 'react-bootstrap'
 import { useForm } from '../../hooks/useForm';
+import axios from 'axios';
 
 export const ListaStock = () => {
     const initialForm = {
         searchText: "",
     };
-    
+
     const { formState, onInputChange, onResetForm } = useForm(initialForm);
 
     const enterPulsed = (event) => {
         if (event.key === "Enter") {
-          event.preventDefault();
+            event.preventDefault();
         }
-      };
+    };
+
+    const url = import.meta.env.VITE_URL_BACKEND;
+
+    const [actualizar, setActualizar] = useState(false)
+    const actualizador = () => setActualizar(!actualizar)
+    const [listado, setListado] = useState(null)
+
+    useEffect(() => {
+        axios.get(`${url}/productos/`).then(({ data }) => {
+            setListado(data)
+        });
+    }, [actualizar]);
+    console.log(listado)
 
     return (
         <>

@@ -9,6 +9,7 @@ export const ListaCodigos = () => {
     searchText: "",
     code: "",
     description: "",
+    isCantidad: ""
   };
 
   const [actualizar, setActualizar] = useState(false);
@@ -48,7 +49,7 @@ export const ListaCodigos = () => {
     setWaitAxios(true);
     setShowAlert(false);
     setShowAlertRepeat(false);
-    if (objeto.description == "" || objeto.code == "") {
+    if (objeto.description == "" || objeto.code == "" || objeto.isCantidad == "") {
       setShowAlert(true);
       return;
     }
@@ -63,10 +64,18 @@ export const ListaCodigos = () => {
     } else {
       setShowAlertRepeat(false);
     }
+    
+    let auxIC;
+    if (formState.isCantidad == "true") {
+      auxIC = true
+    } else {
+      auxIC = false
+    }
 
     let nuevoCP = {
       code: formState.code || "-",
       description: formState.description,
+      isCantidad: auxIC
     };
     if (addMode) {
       agregarProducto(nuevoCP);
@@ -160,6 +169,7 @@ export const ListaCodigos = () => {
     let editProduct = {
       code: lAux,
       description: e.description,
+      isCantidad: e.isCantidad
     };
     setOldProduct(e);
     setFormState(editProduct);
@@ -239,7 +249,11 @@ export const ListaCodigos = () => {
       event.preventDefault();
     }
   };
-  
+
+  useEffect(() => {
+    setWaitAxios(false)
+  }, [formState])
+
   return (
     <>
       <div className="mt-4"></div>
@@ -273,6 +287,7 @@ export const ListaCodigos = () => {
             <th scope="col">#</th>
             <th scope="col">Código de Barras</th>
             <th scope="col">Descripción</th>
+            <th scope="col">Venta</th>
             <th scope="col">Acciones</th>
           </tr>
         </thead>
@@ -282,6 +297,7 @@ export const ListaCodigos = () => {
               <th scope="row">{index + 1} </th>
               <td>{e.code}</td>
               <td>{e.description} </td>
+              <td>{e.isCantidad ? "Cantidad" : "Peso"} </td>
               <td>
                 <button
                   type="button"
@@ -341,6 +357,20 @@ export const ListaCodigos = () => {
                   />
                 </Form.Group>
               </div>
+              <div className="col-12">
+                <Form.Label>¿Se vende por cantidad o por peso?</Form.Label>
+                <Form.Select
+                  aria-label="Default select example"
+                  required
+                  name="isCantidad"
+                  value={formState.isCantidad}
+                  onChange={onInputChange}
+                >
+                  <option value="">Elija una opción...</option>
+                  <option value="true">Cantidad</option>
+                  <option value="false">Peso</option>
+                </Form.Select>
+              </div>
             </div>
           </Form>
           {showAlert && (
@@ -349,10 +379,12 @@ export const ListaCodigos = () => {
                 variant="danger"
                 onClose={() => setShowAlert(false)}
                 dismissible
+                className="mt-2"
               >
                 <b>Formulario incompleto:</b>
                 <p>- El campo descripción debe ser completado</p>
-                <p>- Al menos un código debe ser ingresado.</p>
+                <p>- El campo código de barras debe ser completado.</p>
+                <p>- Debe responder si se vende por Cant o por Peso.</p>
               </Alert>
             </>
           )}

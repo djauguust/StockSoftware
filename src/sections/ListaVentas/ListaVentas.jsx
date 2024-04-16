@@ -75,10 +75,15 @@ export const ListaVentas = () => {
 
   const url = import.meta.env.VITE_URL_BACKEND;
 
+  const [codigos, setCodigos] = useState(null)
+
   useEffect(() => {
     axios.get(`${url}/ventas/`).then(({ data }) => {
       setListado(data);
       setListaFiltrada(data);
+    });
+    axios.get(`${url}/codigos/`).then(({ data }) => {
+      setCodigos(data);
     });
   }, [actualizar]);
 
