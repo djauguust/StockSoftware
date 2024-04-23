@@ -16,6 +16,7 @@ export const ListaCompras = () => {
     amount: "",
     weigth: "",
     userId: "",
+    isCantidad: true,
   };
   const [actualizar, setActualizar] = useState(false);
   const actualizador = () => {
@@ -43,7 +44,7 @@ export const ListaCompras = () => {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [toDelete, setToDelete] = useState(null);
   const [showAlert, setShowAlert] = useState(false);
-  const [waitAxios, setWaitAxios] = useState(false)
+  const [waitAxios, setWaitAxios] = useState(false);
 
   const handleClose = () => {
     setShowModal(false);
@@ -56,7 +57,6 @@ export const ListaCompras = () => {
   const campoDeEntradaRef = useRef(null);
   const campoDeEntradaRef2 = useRef(null);
 
-
   useEffect(() => {
     if (showModal && addMode) {
       campoDeEntradaRef.current.focus();
@@ -65,14 +65,14 @@ export const ListaCompras = () => {
 
   const [oldPurchase, setOldPurchase] = useState(null);
 
-  const [ListaCodigos, setListaCodigos] = useState(null)
+  const [ListaCodigos, setListaCodigos] = useState(null);
 
   const getCodigos = () => {
     axios.get(`${url}/codigos`).then(({ data }) => {
-      console.log(data)
-      setListaCodigos(data)
-    })
-  }
+      console.log(data);
+      setListaCodigos(data);
+    });
+  };
 
   const handleSubmit = (objeto) => {
     setShowAlert(false);
@@ -92,9 +92,10 @@ export const ListaCompras = () => {
       peso: formState.weigth || 0,
       user: user.id,
       fechaHora: obtenerFechaHoraEvento(),
+      isCantidad: formState.isCantidad,
     };
     console.log(nuevaC);
-    setWaitAxios(true)
+    setWaitAxios(true);
     if (addMode) {
       agregarCompra(nuevaC);
     } else {
@@ -119,18 +120,18 @@ export const ListaCompras = () => {
       actualizador();
       campoDeEntradaRef.current.focus();
     }, 500);
-
   };
 
   const agregarCompra = (nueva) => {
-    axios.post(`${url}/compras/`, nueva)
+    axios
+      .post(`${url}/compras/`, nueva)
       .then(({ data }) => {
-        console.log(data.message)
+        console.log(data.message);
       })
       .catch((error) => {
-        console.log(error)
+        console.log(error);
       });
-    return
+    return;
   };
 
   const handleSubmitEdit = (e) => {
@@ -167,10 +168,8 @@ export const ListaCompras = () => {
   };
 
   const handleSubmitDelete = () => {
-    setWaitAxios(true)
-    const index = listado.findIndex(
-      (p) => p.id === toDelete.id
-    );
+    setWaitAxios(true);
+    const index = listado.findIndex((p) => p.id === toDelete.id);
 
     if (index !== -1) {
       axios
@@ -183,7 +182,6 @@ export const ListaCompras = () => {
           console.log(response.data);
         });
       setTimeout(function () {
-
         setWaitAxios(false);
         setShowModal(false);
         onResetForm();
@@ -250,37 +248,40 @@ export const ListaCompras = () => {
 
   useEffect(() => {
     if (!(formState.code == "")) {
-      productoYCodigo()
+      productoYCodigo();
     }
-  }, [formState.code])
+  }, [formState.code]);
 
   const tabPulsed = (event) => {
     if (event.key === "Tab") {
       event.preventDefault();
-      productoYCodigo()
+      productoYCodigo();
       campoDeEntradaRef2.current.focus();
     }
-  }
+  };
 
   const productoYCodigo = () => {
-    let a = ListaCodigos.find((c) => c.code == formState.code)
+    let a = ListaCodigos.find((c) => c.code == formState.code);
 
     if (a != undefined) {
-      setFormState({ ...formState, product: a.description })
+      setFormState({
+        ...formState,
+        product: a.description,
+        isCantidad: a.isCantidad,
+      });
       /* formState.product = a.description */
     } else {
-      setFormState({ ...formState, product: "Producto no encontrado" })
+      setFormState({ ...formState, product: "Producto no encontrado" });
       /* formState.product = "Producto no encontrado" */
     }
-
-  }
+  };
 
   const onEnterPulsed = (event) => {
     if (event.key === "Enter") {
       event.preventDefault();
-      handleSubmit(formState)
+      handleSubmit(formState);
     }
-  }
+  };
 
   const enterPulsed = (event) => {
     if (event.key === "Enter") {
@@ -299,7 +300,7 @@ export const ListaCompras = () => {
         onClick={() => {
           setShowModal(true);
           setAddMode(true);
-          getCodigos()
+          getCodigos();
         }}
       >
         <i className="bi bi-plus-circle"></i> Agregar Compra
@@ -350,7 +351,11 @@ export const ListaCompras = () => {
                 >
                   <i className="bi bi-pencil"></i>
                 </button>
-                <button type="button" className="btn btn-secondary me-2" disabled>
+                <button
+                  type="button"
+                  className="btn btn-secondary me-2"
+                  disabled
+                >
                   <i className="bi bi-eye"></i>
                 </button>
                 <button

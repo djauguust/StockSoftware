@@ -6,7 +6,7 @@ import axios from "axios";
 export const UIVentas = () => {
   const [hora, setHora] = useState(new Date());
 
-  useEffect(() => {
+  /* useEffect(() => {
     // Función para actualizar la hora
     const actualizarHora = () => {
       setHora(new Date());
@@ -18,7 +18,7 @@ export const UIVentas = () => {
     // Limpia el intervalo cuando el componente se desmonta
     return () => clearInterval(intervalo);
   }, []); // El segundo argumento del useEffect está vacío para que solo se ejecute una vez al montar el componente
-
+ */
   // Función para formatear la hora en formato legible
   const formatearHora = (date) => {
     const horas = date.getHours();
@@ -53,6 +53,18 @@ export const UIVentas = () => {
     22, 23, 24, 25, 26, 27, 28, 29, 30,
   ];
 
+  const [actualizar, setActualizar] = useState(false);
+  const actualizador = () => setActualizar(!actualizar);
+
+  const url = import.meta.env.VITE_URL_BACKEND;
+  const [listaDeCodigos, setListaDeCodigos] = useState(null);
+
+  useEffect(() => {
+    axios.get(`${url}/productos/`).then(({ data }) => {
+      setListaDeCodigos(data);
+    });
+  }, [actualizar]);
+
   const refCantidad = useRef(null);
   const refPeso = useRef(null);
   const refCodigo = useRef(null);
@@ -76,6 +88,8 @@ export const UIVentas = () => {
         peso: "",
       });
       /* Carga al carrito y onResetForm */
+
+      agregarACarrito({ codigo: formState.cantidad, cantidad: 1, peso: "" });
     }
   };
 
@@ -95,10 +109,23 @@ export const UIVentas = () => {
         cantidad: "",
       });
       /* Carga al carrito y onResetForm */
+      agregarACarrito({ codigo: formState.peso, peso: 100, cantidad: "" });
     }
   };
 
   const onCodigoPulsed = (event) => {
+    if (event.key === "Tab") {
+      event.preventDefault();
+      if (
+        formState.cantidad == "" &&
+        formState.peso == "" &&
+        formState.codigo !== ""
+      ) {
+        onResetForm();
+        refCantidad.current.focus();
+        return;
+      }
+    }
     if (event.key === "Enter" || event.key === "Tab") {
       event.preventDefault();
       if (
@@ -109,37 +136,67 @@ export const UIVentas = () => {
         /* Cierra la caja */
         console.log("cierro caja");
       } else {
-        if (formState.cantidad !== "" && formState.codigo !== "") {
-          /* Carga en carrito y onResetForm */
+        if (formState.cantidad !== "" && formState.peso !== "") {
+          /* Estado no permitido*/
+          onResetForm();
         } else {
           if (formState.codigo == "") {
             /* onResetForm */
             console.log("Sólo codigo vacío");
           } else {
-            if (formState.cantidad !== "" && formState.peso !== "") {
-              console.log("cantidad y peso con info");
+            /* Carga en carrito y onResetForm */
+            if (formState.cantidad == "" && formState.peso == "") {
+              onResetForm();
             } else {
-              /* Carga en carrito y onResetForm */
+              agregarACarrito(formState);
             }
           }
         }
       }
+      refCantidad.current.focus();
     }
   };
 
   const agregarACarrito = (producto) => {
-    setLista([
-      ...lista,
-      {
-        producto: producto.producto,
-        cantidad: producto.cantidad,
-        peso: producto.peso,
-        precio: producto.precio,
-      },
-    ]);
+    let aux = listaDeCodigos.find((e) => e.codigo == producto.codigo);
+
+    if (aux) {
+      if (
+        (aux.isCantidad && producto.peso == "") ||
+        (!aux.isCantidad && producto.cantidad == "")
+      ) {
+        setLista([
+          ...lista,
+          {
+            producto: aux.descripcion,
+            cantidad: producto.cantidad,
+            peso: producto.peso,
+            precio: aux.precio,
+          },
+        ]);
+      }
+    }
+    onResetForm();
   };
 
   /* Quedo aquí porque tengo que empezar con STOCK */
+  console.log(lista);
+  console.log(listaDeCodigos);
+
+  const limpiarLista = () => {
+    setLista([]);
+    refCantidad.current.focus();
+  };
+
+  const [total, setTotal] = useState(0);
+
+  useEffect(() => {
+    let aux = 0;
+    lista.map((e) => {
+      aux = aux + e.precio * e.cantidad + e.precio * (e.peso / 1000);
+    });
+    setTotal(aux);
+  }, [lista]);
 
   return (
     <Fragment>
@@ -207,7 +264,10 @@ export const UIVentas = () => {
         </div>
       </Row>
       <Row className="my-3 mx-5">
-        <h1>"Nombre producto"</h1>
+        <h1>
+          {lista[lista.length - 1]?.producto} : $
+          {lista[lista.length - 1]?.precio}
+        </h1>
       </Row>
       <hr />
       <table className="table table-striped mt-3 px-4">
@@ -217,16 +277,33 @@ export const UIVentas = () => {
             <th scope="col">PRODUCTO</th>
             <th scope="col">CANTIDAD</th>
             <th scope="col">PESO</th>
-            <th scope="col">PRECIO</th>
+            <th scope="col">PRECIO (Kg o u.)</th>
+            <th scope="col">Subtotal</th>
             <th scope="col">ELIMINAR</th>
           </tr>
         </thead>
         <tbody>
+          {lista.map((p, index) => (
+            <tr key={index}>
+              <th scope="row">{index + 1} </th>
+              <td>{p.producto}</td>
+              <td>{p.cantidad}</td>
+              <td>{p.peso == "" ? "" : `${p.peso}g.`}</td>
+              <td>${p.precio}</td>
+              <td>${p.precio * p.cantidad + p.precio * (p.peso / 1000)}</td>
+              <td>
+                <button type="button" className="btn btn-danger" size="xs">
+                  <i className="bi bi-trash"></i>
+                </button>
+              </td>
+            </tr>
+          ))}
           {array.map((e) => {
             if (e < 30)
               return (
                 <tr key={e + 1}>
                   <th scope="row"> </th>
+                  <td> </td>
                   <td> </td>
                   <td> </td>
                   <td> </td>
@@ -246,13 +323,18 @@ export const UIVentas = () => {
             </Button>
           </div>
           <div className="col-3">
-            <Button className="ms-4" variant="danger" size="lg">
+            <Button
+              className="ms-4"
+              variant="danger"
+              size="lg"
+              onClick={limpiarLista}
+            >
               <b>LIMPIAR</b>
             </Button>
           </div>
           <div className="col-2"></div>
           <div className="col-4">
-            <h1 className="me-0">TOTAL: $1.223</h1>
+            <h1 className="me-0">TOTAL: $ {total}</h1>
           </div>
         </div>
       </nav>
