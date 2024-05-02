@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from "react";
-import { Button, Form, Modal } from "react-bootstrap";
+import { Button, Col, Form, Modal, Row } from "react-bootstrap";
 import { useForm } from "../../hooks/useForm";
 import axios from "axios";
 import { getStringOfProducts } from "./getStringOfProducts";
+import { despuesDe } from "../../hooks/despuesDe";
 
 export const ListaVentas = () => {
   const initialForm = {
@@ -12,7 +13,8 @@ export const ListaVentas = () => {
     price: "",
     userId: "",
   };
-  const { formState, onInputChange, onResetForm } = useForm(initialForm);
+  const { formState, onInputChange, onResetForm, setFormState } =
+    useForm(initialForm);
 
   const [actualizar, setActualizar] = useState(false);
   const actualizador = () => {
@@ -75,7 +77,7 @@ export const ListaVentas = () => {
 
   const url = import.meta.env.VITE_URL_BACKEND;
 
-  const [codigos, setCodigos] = useState(null)
+  const [codigos, setCodigos] = useState(null);
 
   useEffect(() => {
     axios.get(`${url}/ventas/`).then(({ data }) => {
@@ -95,6 +97,26 @@ export const ListaVentas = () => {
       event.preventDefault();
     }
   };
+  const handleSubmitFilter = (event) => {
+    event.preventDefault();
+    const listaFiltrada2 = listado.filter((d) => {
+      let deberiaEstar = true;
+      if (formState.desde !== "") {
+        deberiaEstar = deberiaEstar && despuesDe(d.fechaHora, formState.desde);
+      }
+
+      if (formState.hasta !== "") {
+        deberiaEstar = deberiaEstar && !despuesDe(d.fechaHora, formState.hasta);
+      }
+      return deberiaEstar;
+    });
+    setListaFiltrada(listaFiltrada2);
+  };
+
+  const handleClean = () => {
+    setFormState({ ...formState, desde: "", hasta: "" });
+    setListaFiltrada(listado);
+  };
   return (
     <>
       <h1>Lista de Ventas</h1>
@@ -106,7 +128,7 @@ export const ListaVentas = () => {
         <input
           type="text"
           placeholder="Busca un Producto"
-          className="form-control"
+          className="form-control mb-2"
           name="searchText"
           autoComplete="off"
           value={formState.searchText}
@@ -114,6 +136,39 @@ export const ListaVentas = () => {
           onKeyDown={enterPulsed}
         />
       </Form>
+      <Form.Group className="mb-3">
+        <Row>
+          <Col>
+            <Form.Label>Desde</Form.Label>
+            <Form.Control
+              type="date"
+              value={formState.desde}
+              onChange={onInputChange}
+              name="desde"
+            />
+          </Col>
+          <Col>
+            <Form.Label>Hasta</Form.Label>
+            <Form.Control
+              type="date"
+              value={formState.hasta}
+              onChange={onInputChange}
+              name="hasta"
+            />
+          </Col>
+        </Row>
+      </Form.Group>
+      <Button type="submit" onClick={handleSubmitFilter} className="mt-0">
+        Filtrar Compras
+      </Button>
+      <Button
+        type="button"
+        className="mt-0 ms-3"
+        variant="secondary"
+        onClick={handleClean}
+      >
+        Limpiar Filtro
+      </Button>
       <table className="table table-striped">
         <thead>
           <tr>

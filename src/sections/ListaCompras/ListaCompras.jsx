@@ -1,10 +1,19 @@
 import React, { useContext, useEffect, useRef, useState } from "react";
-import { Alert, Button, Form, InputGroup, Modal } from "react-bootstrap";
+import {
+  Alert,
+  Button,
+  Col,
+  Form,
+  InputGroup,
+  Modal,
+  Row,
+} from "react-bootstrap";
 import { useForm } from "../../hooks/useForm";
 import { obtenerFechaHoraEvento } from "../../hooks/getTime";
 import { siguienteValorAlMaximo } from "../../hooks/getNextId";
 import axios from "axios";
 import { LoginContext } from "../../context/LoginContext";
+import { despuesDe } from "../../hooks/despuesDe";
 
 export const ListaCompras = () => {
   const initialForm = {
@@ -17,6 +26,8 @@ export const ListaCompras = () => {
     weigth: "",
     userId: "",
     isCantidad: true,
+    desde: "",
+    hasta: "",
   };
   const [actualizar, setActualizar] = useState(false);
   const actualizador = () => {
@@ -289,6 +300,26 @@ export const ListaCompras = () => {
     }
   };
 
+  const handleSubmitFilter = (event) => {
+    event.preventDefault();
+    const listaFiltrada2 = listado.filter((d) => {
+      let deberiaEstar = true;
+      if (formState.desde !== "") {
+        deberiaEstar = deberiaEstar && despuesDe(d.fechaHora, formState.desde);
+      }
+
+      if (formState.hasta !== "") {
+        deberiaEstar = deberiaEstar && !despuesDe(d.fechaHora, formState.hasta);
+      }
+      return deberiaEstar;
+    });
+    setListaFiltrada(listaFiltrada2);
+  };
+
+  const handleClean = () => {
+    setFormState({ ...formState, desde: "", hasta: "" });
+    setListaFiltrada(listado);
+  };
   return (
     <>
       <div className="mt-4"></div>
@@ -309,14 +340,48 @@ export const ListaCompras = () => {
         <input
           type="text"
           placeholder="Busca una compra"
-          className="form-control"
+          className="form-control mb-2"
           name="searchText"
           autoComplete="off"
           value={formState.searchText}
           onChange={onInputChange}
           onKeyDown={enterPulsed}
         />
+        <Form.Group className="mb-3">
+          <Row>
+            <Col>
+              <Form.Label>Desde</Form.Label>
+              <Form.Control
+                type="date"
+                value={formState.desde}
+                onChange={onInputChange}
+                name="desde"
+              />
+            </Col>
+            <Col>
+              <Form.Label>Hasta</Form.Label>
+              <Form.Control
+                type="date"
+                value={formState.hasta}
+                onChange={onInputChange}
+                name="hasta"
+              />
+            </Col>
+          </Row>
+        </Form.Group>
+        <Button type="submit" onClick={handleSubmitFilter} className="mt-0">
+          Filtrar Compras
+        </Button>
+        <Button
+          type="button"
+          className="mt-0 ms-3"
+          variant="secondary"
+          onClick={handleClean}
+        >
+          Limpiar Filtro
+        </Button>
       </Form>
+      <hr />
       <table className="table table-striped">
         <thead>
           <tr>

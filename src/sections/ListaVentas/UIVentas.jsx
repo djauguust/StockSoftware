@@ -1,7 +1,15 @@
-import React, { Fragment, useEffect, useRef, useState } from "react";
-import { Button, Col, Form, Row } from "react-bootstrap";
+import React, {
+  Fragment,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
+import { Button, Col, Form, Modal, Row } from "react-bootstrap";
 import { useForm } from "../../hooks/useForm";
 import axios from "axios";
+import { LoginContext } from "../../context/LoginContext";
+import { obtenerFechaHoraEvento } from "../../hooks/getTime";
 
 export const UIVentas = () => {
   const [hora, setHora] = useState(new Date());
@@ -42,6 +50,7 @@ export const UIVentas = () => {
     peso: "",
     producto: "",
     precio: "",
+    cambio: 0,
   };
   const { formState, onInputChange, onResetForm, setFormState } =
     useForm(initialForm);
@@ -52,6 +61,8 @@ export const UIVentas = () => {
     1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21,
     22, 23, 24, 25, 26, 27, 28, 29, 30,
   ];
+
+  const { user } = useContext(LoginContext);
 
   const [actualizar, setActualizar] = useState(false);
   const actualizador = () => setActualizar(!actualizar);
@@ -134,7 +145,7 @@ export const UIVentas = () => {
         formState.cantidad == ""
       ) {
         /* Cierra la caja */
-        console.log("cierro caja");
+        watchModal();
       } else {
         if (formState.cantidad !== "" && formState.peso !== "") {
           /* Estado no permitido*/
@@ -172,6 +183,8 @@ export const UIVentas = () => {
             cantidad: producto.cantidad,
             peso: producto.peso,
             precio: aux.precio,
+            codigo: aux.codigo,
+            isCantidad: aux.isCantidad,
           },
         ]);
       }
@@ -197,6 +210,55 @@ export const UIVentas = () => {
     });
     setTotal(aux);
   }, [lista]);
+
+  const [showModal, setShowModal] = useState(false);
+  const handleClose = () => setShowModal(false);
+
+  const campoDeEntradaRef = useRef(null);
+
+  const watchModal = () => {
+    if (total == 0) {
+      console.log("Sin productos!");
+    } else {
+      setShowModal(true);
+      setFormState({ ...formState, cambio: "" });
+      setTimeout(function () {
+        campoDeEntradaRef.current.focus();
+      }, 100);
+    }
+  };
+
+  const handleSubmit = () => {
+    let aux = {
+      user: user.id,
+      fechaHora: obtenerFechaHoraEvento(),
+      productos: lista,
+    };
+    console.log(aux);
+    axios
+      .post(`${url}/ventas`, aux)
+      .then(({ data }) => {
+        console.log(data);
+        setShowModal(false);
+        setLista([]);
+      })
+      .catch(({ response }) => {
+        console.log(response.data);
+      });
+  };
+
+  const enterPulsed = (event) => {
+    if (event.key === "Enter") {
+      event.preventDefault();
+      handleSubmit();
+    }
+  };
+
+  const deleteElement = (e) => {
+    const newArray = [...lista.slice(0, e), ...lista.slice(e + 1)];
+    setLista(newArray);
+    refCantidad.current.focus();
+  };
 
   return (
     <Fragment>
@@ -292,7 +354,12 @@ export const UIVentas = () => {
               <td>${p.precio}</td>
               <td>${p.precio * p.cantidad + p.precio * (p.peso / 1000)}</td>
               <td>
-                <button type="button" className="btn btn-danger" size="xs">
+                <button
+                  type="button"
+                  className="btn btn-danger"
+                  size="xs"
+                  onClick={() => deleteElement(index)}
+                >
                   <i className="bi bi-trash"></i>
                 </button>
               </td>
@@ -318,7 +385,12 @@ export const UIVentas = () => {
       <nav className="navbar navbar-dark bg-dark fixed-bottom text-white">
         <div className="container">
           <div className="col-3">
-            <Button className="ms-4" variant="success" size="lg">
+            <Button
+              className="ms-4"
+              variant="success"
+              size="lg"
+              onClick={() => watchModal()}
+            >
               <b>PAGAR</b>
             </Button>
           </div>
@@ -338,6 +410,91 @@ export const UIVentas = () => {
           </div>
         </div>
       </nav>
+
+      <Modal show={showModal} onHide={handleClose}>
+        <Modal.Header closeButton>
+          <Modal.Title>CONFIRMAR VENTA</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <Form>
+            <div className="row mx-0">
+              <div className="col-12">
+                <Form.Group className="mb-3" controlId="formCodBarra">
+                  <Form.Label>
+                    <b>TOTAL A PAGAR</b>
+                  </Form.Label>
+                  <Form.Control
+                    type="number"
+                    name="total"
+                    value={total}
+                    disabled
+                  />
+                </Form.Group>
+              </div>
+              <div className="col-12">
+                <Form.Group className="mb-3" controlId="formCodBarra">
+                  <Form.Label>
+                    <b>CAMBIO</b>
+                  </Form.Label>
+                  <Form.Control
+                    type="number"
+                    name="cambio"
+                    value={formState.cambio}
+                    onChange={onInputChange}
+                    ref={campoDeEntradaRef}
+                    onKeyDown={enterPulsed}
+                  />
+                </Form.Group>
+              </div>
+              <div className="col-12">
+                <Form.Group className="mb-3" controlId="formCodBarra">
+                  <Form.Label>
+                    <b>VUELTO</b>
+                  </Form.Label>
+                  <Form.Control
+                    type="number"
+                    name="vuelto"
+                    value={formState.cambio - total}
+                    disabled
+                  />
+                </Form.Group>
+              </div>
+            </div>
+          </Form>
+          {/* {showAlert && (
+            <>
+              <Alert
+                variant="danger"
+                onClose={() => setShowAlert(false)}
+                dismissible
+              >
+                <b>Formulario incompleto:</b>
+                <p>- Al menos un código debe ser ingresado.</p>
+                <p>- Al menos la cantidad o el peso debe ser ingresado.</p>
+                <p>- El precio total es obligatorio.</p>
+              </Alert>
+            </>
+          )} */}
+        </Modal.Body>
+        <Modal.Footer>
+          <Button
+            variant="secondary"
+            onClick={handleClose}
+            /* disabled={waitAxios} */
+          >
+            Cerrar
+          </Button>
+          <Button
+            variant="primary"
+            onClick={() => {
+              handleSubmit(formState);
+            }}
+            /* disabled={waitAxios} */
+          >
+            Confirmar Venta
+          </Button>
+        </Modal.Footer>
+      </Modal>
     </Fragment>
   );
 };
