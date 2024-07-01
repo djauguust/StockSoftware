@@ -91,7 +91,7 @@ export const Navbar = () => {
                   }
                   to="/"
                 >
-                  Sistema de Stock
+                  Sistema Online de Stock
                 </NavLink>
 
                 <NavLink
