@@ -272,7 +272,7 @@ export const ListaCodigos = () => {
       <Form className="mt-3">
         <input
           type="text"
-          placeholder="Busca un producto"
+          placeholder="Busca un producto" 
           className="form-control"
           name="searchText"
           autoComplete="off"
